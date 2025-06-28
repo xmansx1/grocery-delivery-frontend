@@ -39,23 +39,12 @@
 <div class="container py-4">
   <h4 class="text-center mb-4">طلبات المحل</h4>
 
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <select id="statusFilter" class="form-select w-50" onchange="filterOrders(this.value)">
-      <option value="">كل الحالات</option>
-      <option value="جديد">جديد</option>
-      <option value="قيد التجهيز">قيد التجهيز</option>
-      <option value="قيد التوصيل">قيد التوصيل</option>
-    </select>
-    <div>
-      <span id="dailyCount" class="badge bg-success mx-1"></span>
-      <span id="statusCount" class="badge bg-primary mx-1"></span>
-    </div>
-  </div>
+
 
   <div id="ordersContainer"></div>
 </div>
 
-<!-- نافذة المندوب -->
+<!-- نافذة اختيار المندوب -->
 <div class="modal fade" id="assignModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content p-3">
@@ -85,45 +74,13 @@ if (!token) window.location.href = "/login.html";
 let allOrders = [];
 let selectedOrderId = null;
 
-function timeSince(createdAt) {
-  const diffMs = Date.now() - new Date(createdAt).getTime();
-  const mins = Math.floor(diffMs / 60000);
-  if (mins < 60) return `${mins} دقيقة`;
-  const hours = Math.floor(mins / 60);
-  return `${hours} ساعة`;
-}
-
 async function fetchStoreOrders() {
   const res = await fetch(`${API_BASE_URL}/store/orders`, {
     headers: { Authorization: "Bearer " + token }
   });
-  let data = await res.json();
-
-  // استبعاد الحالات المنتهية
-  data = data.filter(order =>
-    ["جديد", "قيد التوصيل", "قيد التجهيز"].includes(order.status)
-  );
-
-  allOrders = data;
-  updateStats(data);
-  renderOrders(data);
-}
-
-function updateStats(orders) {
-  const today = new Date().toISOString().split("T")[0];
-  const daily = orders.filter(o => o.created_at.startsWith(today)).length;
-  const statusCount = {
-    "جديد": 0,
-    "قيد التجهيز": 0,
-    "قيد التوصيل": 0,
-  };
-  orders.forEach(o => {
-    if (statusCount[o.status] !== undefined) statusCount[o.status]++;
-  });
-
-  document.getElementById("dailyCount").textContent = `اليومي: ${daily}`;
-  document.getElementById("statusCount").textContent =
-    `جديد: ${statusCount["جديد"]} | تجهيز: ${statusCount["قيد التجهيز"]} | توصيل: ${statusCount["قيد التوصيل"]}`;
+  const data = await res.json();
+  allOrders = data.filter(o => o.status !== "تم التوصيل" && o.status !== "تم الإلغاء" && o.status !== "محذوف");
+  renderOrders(allOrders);
 }
 
 function renderOrders(orders) {
@@ -131,7 +88,11 @@ function renderOrders(orders) {
   container.innerHTML = "";
   orders.forEach(order => {
     const color = getStatusColor(order.status);
-    const elapsed = timeSince(order.created_at);
+    const createdAt = new Date(order.created_at);
+    const now = new Date();
+    const diffMs = now - createdAt;
+    const diffMinutes = Math.floor(diffMs / 60000);
+    const timeDisplay = diffMinutes < 60 ? `${diffMinutes} دقيقة` : `${Math.floor(diffMinutes / 60)} ساعة`;
     container.innerHTML += `
       <div class="order-card">
         <div class="d-flex justify-content-between">
@@ -140,8 +101,8 @@ function renderOrders(orders) {
         </div>
         <p>📞 ${order.customer_phone}</p>
         <p>📦 ${order.order_text}</p>
-        <p>🕒 منذ: ${elapsed}</p>
         <p>💵 المبلغ: ${order.amount || '-'} ريال</p>
+        <p>⏱ منذ: ${timeDisplay}</p>
         ${order.rider_name ? `<p>🚴‍♂️ المندوب: ${order.rider_name}</p>` : ""}
         <div class="d-flex gap-2 flex-wrap mt-2">
           <button class="btn btn-sm btn-outline-primary" onclick="viewLocation(${order.lat}, ${order.lng})">عرض الموقع</button>
@@ -185,9 +146,16 @@ async function updateStatus(orderId, status) {
 
 async function openAssignModal(orderId) {
   selectedOrderId = orderId;
-  const res = await fetch(`${API_BASE_URL}/riders`, {
+  const res = await fetch(`${API_BASE_URL}/store/riders`, {
     headers: { Authorization: "Bearer " + token }
   });
+
+  if (!res.ok) {
+    const error = await res.json();
+    alert("خطأ في جلب المناديب: " + (error.detail || "غير مصرح"));
+    return;
+  }
+
   const riders = await res.json();
   const select = document.getElementById("riderSelect");
   select.innerHTML = riders
