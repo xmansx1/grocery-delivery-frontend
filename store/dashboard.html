@@ -116,7 +116,7 @@
 
     async function fetchRiders() {
       try {
-        const res = await fetch(`${API_BASE_URL}/store/riders`, { headers });
+        const res = await fetch(`${API_BASE_URL}/store/available-riders`, { headers });
         const data = await res.json();
         const select = document.getElementById("riderSelect");
         select.innerHTML = data

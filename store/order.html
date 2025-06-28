@@ -168,10 +168,14 @@ async function openAssignModal(orderId) {
 
     const riders = await res.json();
     const select = document.getElementById("riderSelect");
-    select.innerHTML = riders
-      .filter(r => r.status === "متاح ✅")
-      .map(r => `<option value="${r.id}">${r.name} - ${r.phone}</option>`)
-      .join("");
+
+    if (riders.length === 0) {
+      select.innerHTML = `<option disabled selected>لا يوجد مناديب متاحين حالياً</option>`;
+    } else {
+      select.innerHTML = riders
+        .map(r => `<option value="${r.id}">${r.name} - ${r.phone}</option>`)
+        .join("");
+    }
 
     new bootstrap.Modal(document.getElementById("assignModal")).show();
   } catch (err) {
