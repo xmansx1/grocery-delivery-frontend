@@ -1,241 +1,237 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>طلبات المحل</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-    />
-    <style>
-      body {
-        background-color: #f8f9fa;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      }
-      .badge-status {
-        padding: 6px 12px;
-        border-radius: 12px;
-        font-size: 0.85rem;
-        color: #fff;
-      }
-      #mapModal .modal-dialog {
-        max-width: 800px;
-      }
-      #map {
-        height: 400px;
-      }
-      .order-card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        transition: 0.2s;
-      }
-      .order-card:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      }
-      nav {
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-      }
-    </style>
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="dashboard.html">لوحة تحكم المحل</a>
-        <button class="btn btn-outline-light" onclick="logout()">
-          تسجيل خروج
-        </button>
-      </div>
-    </nav>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>طلبات المحل</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .badge-status {
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      color: #fff;
+    }
+    .order-card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      margin-bottom: 15px;
+    }
+  </style>
+</head>
+<body>
 
-    <div class="container my-4">
-      <h4 class="text-center mb-4">طلبات المحل</h4>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="dashboard.html">لوحة تحكم المحل</a>
+    <button class="btn btn-outline-light" onclick="logout()">تسجيل خروج</button>
+  </div>
+</nav>
 
-      <select
-        id="statusFilter"
-        class="form-select w-50 mx-auto mb-4"
-        onchange="filterOrders(this.value)"
-      >
-        <option value="">كل الحالات</option>
-        <option value="جديد">جديد</option>
-        <option value="قيد التجهيز">قيد التجهيز</option>
-        <option value="قيد التوصيل">قيد التوصيل</option>
-        <option value="تم التوصيل">تم التوصيل</option>
-        <option value="تم الإلغاء">تم الإلغاء</option>
-      </select>
+<div class="container py-4">
+  <h4 class="text-center mb-4">طلبات المحل</h4>
 
-      <div id="ordersContainer"></div>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <select id="statusFilter" class="form-select w-50" onchange="filterOrders(this.value)">
+      <option value="">كل الحالات</option>
+      <option value="جديد">جديد</option>
+      <option value="قيد التجهيز">قيد التجهيز</option>
+      <option value="قيد التوصيل">قيد التوصيل</option>
+    </select>
+    <div>
+      <span id="dailyCount" class="badge bg-success mx-1"></span>
+      <span id="statusCount" class="badge bg-primary mx-1"></span>
     </div>
+  </div>
 
-    <!-- نافذة عرض الموقع -->
-    <div class="modal fade" id="mapModal" tabindex="-1">
-      <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content p-3">
-          <div id="map"></div>
+  <div id="ordersContainer"></div>
+</div>
+
+<!-- نافذة المندوب -->
+<div class="modal fade" id="assignModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content p-3">
+      <h5 class="mb-3">إسناد الطلب لمندوب</h5>
+      <div class="mb-2">
+        <label>اختر المندوب</label>
+        <select id="riderSelect" class="form-select"></select>
+      </div>
+      <div class="mb-2">
+        <label>أدخل مبلغ الطلب</label>
+        <input type="number" id="amountInput" class="form-control" placeholder="مثال: 25" />
+      </div>
+      <div class="text-end">
+        <button class="btn btn-success" onclick="confirmAssign()">تأكيد الإسناد</button>
+        <button class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="../assets/js/env.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+const token = localStorage.getItem("store_token");
+if (!token) window.location.href = "/login.html";
+
+let allOrders = [];
+let selectedOrderId = null;
+
+function timeSince(createdAt) {
+  const diffMs = Date.now() - new Date(createdAt).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 60) return `${mins} دقيقة`;
+  const hours = Math.floor(mins / 60);
+  return `${hours} ساعة`;
+}
+
+async function fetchStoreOrders() {
+  const res = await fetch(`${API_BASE_URL}/store/orders`, {
+    headers: { Authorization: "Bearer " + token }
+  });
+  let data = await res.json();
+
+  // استبعاد الحالات المنتهية
+  data = data.filter(order =>
+    ["جديد", "قيد التوصيل", "قيد التجهيز"].includes(order.status)
+  );
+
+  allOrders = data;
+  updateStats(data);
+  renderOrders(data);
+}
+
+function updateStats(orders) {
+  const today = new Date().toISOString().split("T")[0];
+  const daily = orders.filter(o => o.created_at.startsWith(today)).length;
+  const statusCount = {
+    "جديد": 0,
+    "قيد التجهيز": 0,
+    "قيد التوصيل": 0,
+  };
+  orders.forEach(o => {
+    if (statusCount[o.status] !== undefined) statusCount[o.status]++;
+  });
+
+  document.getElementById("dailyCount").textContent = `اليومي: ${daily}`;
+  document.getElementById("statusCount").textContent =
+    `جديد: ${statusCount["جديد"]} | تجهيز: ${statusCount["قيد التجهيز"]} | توصيل: ${statusCount["قيد التوصيل"]}`;
+}
+
+function renderOrders(orders) {
+  const container = document.getElementById("ordersContainer");
+  container.innerHTML = "";
+  orders.forEach(order => {
+    const color = getStatusColor(order.status);
+    const elapsed = timeSince(order.created_at);
+    container.innerHTML += `
+      <div class="order-card">
+        <div class="d-flex justify-content-between">
+          <h5>${order.customer_name}</h5>
+          <span class="badge-status" style="background-color:${color}">${order.status}</span>
         </div>
-      </div>
-    </div>
+        <p>📞 ${order.customer_phone}</p>
+        <p>📦 ${order.order_text}</p>
+        <p>🕒 منذ: ${elapsed}</p>
+        <p>💵 المبلغ: ${order.amount || '-'} ريال</p>
+        ${order.rider_name ? `<p>🚴‍♂️ المندوب: ${order.rider_name}</p>` : ""}
+        <div class="d-flex gap-2 flex-wrap mt-2">
+          <button class="btn btn-sm btn-outline-primary" onclick="viewLocation(${order.lat}, ${order.lng})">عرض الموقع</button>
+          <button class="btn btn-sm btn-outline-warning" onclick="updateStatus(${order.id}, 'قيد التجهيز')">قيد التجهيز</button>
+          <button class="btn btn-sm btn-outline-success" onclick="openAssignModal(${order.id})">إرسال لمندوب</button>
+          <button class="btn btn-sm btn-outline-dark" onclick="updateStatus(${order.id}, 'تم التوصيل')">تم التوصيل</button>
+          <button class="btn btn-sm btn-outline-danger" onclick="updateStatus(${order.id}, 'تم الإلغاء')">إلغاء</button>
+        </div>
+      </div>`;
+  });
+}
 
-    <script src="../assets/js/env.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-      const token = localStorage.getItem("store_token");
-      if (!token) window.location.href = "login.html";
+function getStatusColor(status) {
+  return {
+    "جديد": "#2196f3",
+    "قيد التجهيز": "#ff9800",
+    "قيد التوصيل": "#9c27b0",
+    "تم التوصيل": "#4caf50",
+    "تم الإلغاء": "#f44336"
+  }[status] || "#ccc";
+}
 
-      let allOrders = [];
+function filterOrders(status) {
+  if (!status) return renderOrders(allOrders);
+  const filtered = allOrders.filter(o => o.status === status);
+  renderOrders(filtered);
+}
 
-      async function fetchStoreOrders() {
-        try {
-          const res = await fetch(`${API_BASE_URL}/store/orders`, {
-            headers: { Authorization: "Bearer " + token },
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.detail || "فشل تحميل الطلبات");
-          allOrders = data;
-          renderOrders(allOrders);
-        } catch (err) {
-          document.getElementById(
-            "ordersContainer"
-          ).innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
-        }
-      }
+async function updateStatus(orderId, status) {
+  if (!confirm(`هل تريد تغيير الحالة إلى: ${status}؟`)) return;
+  await fetch(`${API_BASE_URL}/store/status/${orderId}`, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + token,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ status })
+  });
+  fetchStoreOrders();
+}
 
-      function renderOrders(orders) {
-        const container = document.getElementById("ordersContainer");
-        container.innerHTML = "";
-        orders.forEach((order) => {
-          const color = getStatusColor(order.status);
-          container.innerHTML += `
-          <div class="card mb-3 order-card">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <h5 class="mb-0">${order.customer_name} - ${
-            order.customer_phone
-          }</h5>
-                <span class="badge-status" style="background-color: ${color};">${
-            order.status
-          }</span>
-              </div>
-              <p class="mb-2">${order.order_text}</p>
-              <div class="d-flex gap-2 flex-wrap">
-                ${
-                  order.status === "جديد"
-                    ? `<button class="btn btn-warning btn-sm" onclick="markPreparing(${order.id})">قيد التجهيز</button>`
-                    : ""
-                }
-                ${
-                  order.status === "قيد التجهيز"
-                    ? `<button class="btn btn-success btn-sm" onclick="assignRider(${order.id})">إرسال لمندوب</button>`
-                    : ""
-                }
-                <button class="btn btn-outline-primary btn-sm" onclick="viewLocation(${
-                  order.lat
-                }, ${order.lng})">عرض الموقع</button>
-              </div>
-            </div>
-          </div>
-        `;
-        });
-      }
+async function openAssignModal(orderId) {
+  selectedOrderId = orderId;
+  const res = await fetch(`${API_BASE_URL}/riders`, {
+    headers: { Authorization: "Bearer " + token }
+  });
+  const riders = await res.json();
+  const select = document.getElementById("riderSelect");
+  select.innerHTML = riders
+    .filter(r => r.status === "متاح ✅")
+    .map(r => `<option value="${r.id}">${r.name} - ${r.phone}</option>`)
+    .join("");
+  new bootstrap.Modal(document.getElementById("assignModal")).show();
+}
 
-      function getStatusColor(status) {
-        const colors = {
-          جديد: "#2196f3",
-          "قيد التجهيز": "#ff9800",
-          "قيد التوصيل": "#9c27b0",
-          "تم التوصيل": "#4caf50",
-          "تم الإلغاء": "#f44336",
-        };
-        return colors[status] || "#6c757d";
-      }
+async function confirmAssign() {
+  const riderId = document.getElementById("riderSelect").value;
+  const amount = document.getElementById("amountInput").value;
+  if (!riderId || !amount) return alert("يرجى اختيار المندوب وإدخال المبلغ");
 
-      function filterOrders(status) {
-        if (!status) return renderOrders(allOrders);
-        const filtered = allOrders.filter((order) => order.status === status);
-        renderOrders(filtered);
-      }
+  const res = await fetch(`${API_BASE_URL}/store/assign/${selectedOrderId}`, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + token,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ rider_id: riderId, amount })
+  });
+  const data = await res.json();
+  if (res.ok) {
+    window.open(data.rider_whatsapp, "_blank");
+    window.open(data.customer_whatsapp, "_blank");
+    fetchStoreOrders();
+    bootstrap.Modal.getInstance(document.getElementById("assignModal")).hide();
+  } else {
+    alert(data.detail || "فشل الإسناد");
+  }
+}
 
-      async function markPreparing(orderId) {
-        if (!confirm("هل تريد نقل الطلب إلى 'قيد التجهيز'؟")) return;
-        await updateOrderStatus(orderId, "قيد التجهيز");
-      }
+function viewLocation(lat, lng) {
+  window.open(`https://maps.google.com/?q=${lat},${lng}`, "_blank");
+}
 
-      async function assignRider(orderId) {
-        const amount = prompt("أدخل مبلغ الطلب:");
-        if (!amount || isNaN(amount)) return alert("الرجاء إدخال مبلغ صالح");
-        try {
-          const res = await fetch(`${API_BASE_URL}/store/assign/${orderId}`, {
-            method: "POST",
-            headers: {
-              Authorization: "Bearer " + token,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ amount }),
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.detail || "فشل الإرسال");
-          alert("📦 تم إرسال الطلب للمندوب بنجاح");
-          fetchStoreOrders();
-        } catch (err) {
-          alert(err.message);
-        }
-      }
+function logout() {
+  localStorage.clear();
+  window.location.href = "/login.html";
+}
 
-      async function updateOrderStatus(orderId, status) {
-        try {
-          const res = await fetch(`${API_BASE_URL}/store/status/${orderId}`, {
-            method: "POST",
-            headers: {
-              Authorization: "Bearer " + token,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ status }),
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.detail || "فشل التحديث");
-          fetchStoreOrders();
-        } catch (err) {
-          alert(err.message);
-        }
-      }
-
-      function viewLocation(lat, lng) {
-        const modalEl = document.getElementById("mapModal");
-        const modal = new bootstrap.Modal(modalEl);
-        modal.show();
-
-        modalEl.addEventListener(
-          "shown.bs.modal",
-          () => {
-            const mapContainer = document.getElementById("map");
-            mapContainer.innerHTML = ""; // إعادة ضبط الخريطة
-            const map = L.map("map").setView([lat, lng], 16);
-            L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-              attribution: "OpenStreetMap contributors",
-            }).addTo(map);
-            L.marker([lat, lng]).addTo(map);
-          },
-          { once: true }
-        );
-      }
-
-      function logout() {
-        localStorage.clear(); // ✅ يمسح جميع البيانات المخزنة لأي نوع حساب
-        window.location.href = "/login.html"; // ✅ إعادة التوجيه إلى الصفحة الرئيسية العامة
-      }
-
-      // ✅ تحديث الطلبات كل 10 ثوانٍ تلقائيًا
-      setInterval(fetchStoreOrders, 10000);
-      fetchStoreOrders();
-    </script>
-  </body>
+fetchStoreOrders();
+setInterval(fetchStoreOrders, 10000);
+</script>
+</body>
 </html>
