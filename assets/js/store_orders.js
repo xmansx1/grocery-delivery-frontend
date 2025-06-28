@@ -1,20 +1,19 @@
 // 📁 store_orders.js - سكربت إدارة الطلبات في واجهة المتجر
 
-const token = localStorage.getItem("store_token");
-
 document.addEventListener("DOMContentLoaded", () => {
+  const token = localStorage.getItem("store_token");
   if (!token) {
     window.location.href = "/store/login.html";
     return;
   }
 
-  fetchStoreOrders();
-  setInterval(fetchStoreOrders, 10000);
+  fetchStoreOrders(token);
+  setInterval(() => fetchStoreOrders(token), 10000);
 });
 
 let selectedOrderId = null;
 
-async function fetchStoreOrders() {
+async function fetchStoreOrders(token) {
   try {
     const res = await fetch(`${API_BASE_URL}/store/orders`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -64,6 +63,7 @@ function getStatusColor(status) {
 }
 
 async function updateStatus(orderId, status) {
+  const token = localStorage.getItem("store_token");
   if (!confirm(`هل تريد تغيير الحالة إلى: ${status}؟`)) return;
   try {
     const res = await fetch(`${API_BASE_URL}/store/status/${orderId}`, {
@@ -81,7 +81,7 @@ async function updateStatus(orderId, status) {
       window.open(data.whatsapp_link, "_blank");
     }
 
-    fetchStoreOrders();
+    fetchStoreOrders(token);
   } catch (err) {
     alert(err.message);
   }
@@ -93,6 +93,7 @@ function viewLocation(lat, lng) {
 
 async function openAssignModal(orderId) {
   selectedOrderId = orderId;
+  const token = localStorage.getItem("store_token");
   try {
     const res = await fetch(`${API_BASE_URL}/store/available-riders`, {
       headers: { Authorization: "Bearer " + token },
@@ -115,6 +116,7 @@ async function openAssignModal(orderId) {
 function confirmAssign() {
   const riderId = document.getElementById("riderSelect").value;
   const amount = document.getElementById("amountInput").value;
+  const token = localStorage.getItem("store_token");
   if (!riderId || !amount) return alert("يرجى اختيار المندوب وإدخال المبلغ");
 
   fetch(`${API_BASE_URL}/store/assign/${selectedOrderId}`, {
@@ -132,7 +134,7 @@ function confirmAssign() {
       window.open(data.rider_whatsapp, "_blank");
       window.open(data.customer_whatsapp, "_blank");
       bootstrap.Modal.getInstance(document.getElementById("assignModal")).hide();
-      fetchStoreOrders();
+      fetchStoreOrders(token);
     })
     .catch((err) => alert("فشل الإسناد: " + err.message));
 }
