@@ -3,61 +3,262 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>نموذج الطلب</title>
+  <title>نموذج الطلب - حي تنال</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body {
-      background-color: #f8f9fa;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    :root {
+      --primary-color: #4361ee;
+      --secondary-color: #3a0ca3;
+      --success-color: #4cc9f0;
+      --light-bg: #f8f9fa;
+      --dark-text: #2b2d42;
+      --light-text: #8d99ae;
+      --border-radius: 12px;
+      --box-shadow: 0 10px 20px rgba(0, 0, 0, 0.08);
+      --gradient-primary: linear-gradient(135deg, #4361ee, #3a0ca3);
     }
-    #map {
-      height: 400px;
+
+    body {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      font-family: 'Tajawal', sans-serif;
+      color: var(--dark-text);
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 800px;
+      padding-top: 2rem;
+      padding-bottom: 3rem;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      position: relative;
+    }
+
+    .page-header h2 {
+      font-weight: 700;
+      color: var(--secondary-color);
+      position: relative;
+      display: inline-block;
+      padding-bottom: 10px;
+    }
+
+    .page-header h2::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      right: 50%;
+      transform: translateX(50%);
+      width: 80px;
+      height: 4px;
+      background: var(--gradient-primary);
+      border-radius: 2px;
+    }
+
+    .order-form {
+      background-color: white;
+      border-radius: var(--border-radius);
+      padding: 2.5rem;
+      box-shadow: var(--box-shadow);
+      border: none;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .order-form::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
       width: 100%;
-      border-radius: 10px;
-      margin-bottom: 20px;
+      height: 8px;
+      background: var(--gradient-primary);
+    }
+
+    .form-label {
+      font-weight: 600;
+      color: var(--secondary-color);
+      margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+      padding: 0.75rem 1rem;
+      border-radius: var(--border-radius);
+      border: 1px solid #e0e0e0;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
+    }
+
+    #map {
+      height: 350px;
+      width: 100%;
+      border-radius: var(--border-radius);
+      margin-bottom: 1.5rem;
+      border: 1px solid #e0e0e0;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      transition: all 0.3s ease;
+    }
+
+    #map:hover {
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-submit {
+      background: var(--gradient-primary);
+      border: none;
+      padding: 0.75rem;
+      font-weight: 600;
+      font-size: 1.1rem;
+      border-radius: var(--border-radius);
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+      box-shadow: 0 5px 15px rgba(67, 97, 238, 0.3);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(67, 97, 238, 0.4);
+    }
+
+    .alert {
+      border-radius: var(--border-radius);
+      padding: 1rem;
+      text-align: center;
+      font-weight: 500;
+    }
+
+    .loading-spinner {
+      display: none;
+      width: 1.5rem;
+      height: 1.5rem;
+      border: 0.25em solid currentColor;
+      border-right-color: transparent;
+      border-radius: 50%;
+      animation: spinner 0.75s linear infinite;
+      margin-right: 0.5rem;
+      vertical-align: -0.25em;
+    }
+
+    @keyframes spinner {
+      to { transform: rotate(360deg); }
+    }
+
+    .location-icon {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--primary-color);
+      cursor: pointer;
+      z-index: 1000;
+      background: white;
+      padding: 5px;
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    /* تعديلات للشاشات الصغيرة */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      .order-form {
+        padding: 1.5rem;
+      }
+      
+      #map {
+        height: 300px;
+      }
+    }
+
+    @media (max-width: 576px) {
+      .page-header h2 {
+        font-size: 1.8rem;
+      }
+      
+      .form-control, .form-select, .btn-submit {
+        padding: 0.65rem 0.9rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container py-5">
-    <h2 class="text-center mb-4">نموذج الطلب</h2>
-    <form id="orderForm" class="bg-white p-4 rounded shadow">
-      <div class="mb-3">
-        <label for="name" class="form-label">الاسم</label>
-        <input type="text" class="form-control" id="name" required />
+  <div class="container py-4">
+    <div class="page-header animate__animated animate__fadeIn">
+      <h2>نموذج الطلب</h2>
+    </div>
+    
+    <form id="orderForm" class="order-form animate__animated animate__fadeInUp">
+      <div class="mb-4">
+        <label for="name" class="form-label">الاسم الكامل</label>
+        <div class="input-group">
+          <span class="input-group-text bg-light"><i class="fas fa-user"></i></span>
+          <input type="text" class="form-control" id="name" placeholder="أدخل اسمك الكامل" required />
+        </div>
       </div>
-      <div class="mb-3">
+      
+      <div class="mb-4">
         <label for="phone" class="form-label">رقم الجوال</label>
-        <input type="tel" class="form-control" id="phone" required />
+        <div class="input-group">
+          <span class="input-group-text bg-light"><i class="fas fa-phone"></i></span>
+          <input type="tel" class="form-control" id="phone" placeholder="05XXXXXXXX" required />
+        </div>
       </div>
-      <div class="mb-3">
+      
+      <div class="mb-4">
         <label for="store" class="form-label">اختيار المحل</label>
-        <select class="form-select" id="store" required>
-          <option value="">جاري التحميل...</option>
-        </select>
+        <div class="input-group">
+          <span class="input-group-text bg-light"><i class="fas fa-store"></i></span>
+          <select class="form-select" id="store" required>
+            <option value="">جاري تحميل المحلات...</option>
+          </select>
+        </div>
       </div>
-      <div class="mb-3">
+      
+      <div class="mb-4">
         <label for="order" class="form-label">تفاصيل الطلب</label>
-        <textarea class="form-control" id="order" rows="3" required></textarea>
+        <textarea class="form-control" id="order" rows="4" placeholder="صف طلبك بالتفصيل" required></textarea>
       </div>
-      <div class="mb-3">
-        <label for="notes" class="form-label">ملاحظات إضافية</label>
-        <textarea class="form-control" id="notes" rows="2"></textarea>
+      
+      <div class="mb-4">
+        <label for="notes" class="form-label">ملاحظات إضافية (اختياري)</label>
+        <textarea class="form-control" id="notes" rows="2" placeholder="أي ملاحظات إضافية لتوصيل الطلب"></textarea>
       </div>
-      <div class="mb-3">
-        <label class="form-label">تحديد موقعك</label>
+      
+      <div class="mb-4 position-relative">
+        <label class="form-label">تحديد موقعك على الخريطة</label>
         <div id="map"></div>
+        <button type="button" id="locateMe" class="location-icon" title="تحديد موقعي الحالي">
+          <i class="fas fa-location-arrow"></i>
+        </button>
         <input type="hidden" id="lat" name="lat">
         <input type="hidden" id="lng" name="lng">
+        <small class="text-muted">يمكنك سحب العلامة لتحديد موقعك بدقة</small>
       </div>
-      <button type="submit" class="btn btn-primary w-100">إرسال الطلب</button>
+      
+      <button type="submit" class="btn btn-primary w-100 btn-submit">
+        <span class="loading-spinner" id="spinner"></span>
+        <span id="submitText">إرسال الطلب</span>
+      </button>
     </form>
-    <div id="alert" class="mt-3"></div>
+    
+    <div id="alert" class="mt-4"></div>
   </div>
 
   <script src="./assets/js/env.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.js"></script>
   <script>
     let map, marker;
 
@@ -66,25 +267,47 @@
       map = L.map('map').setView(defaultCoords, 13);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(map);
 
-      marker = L.marker(defaultCoords, { draggable: true }).addTo(map);
+      // إنشاء علامة مخصصة
+      const customIcon = L.icon({
+        iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png',
+        iconSize: [40, 40],
+        iconAnchor: [20, 40],
+        popupAnchor: [0, -40]
+      });
+
+      marker = L.marker(defaultCoords, { 
+        draggable: true,
+        icon: customIcon
+      }).addTo(map);
+      
+      marker.bindPopup("موقع التوصيل").openPopup();
       updateLatLng(defaultCoords[0], defaultCoords[1]);
 
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function (position) {
-          const lat = position.coords.latitude;
-          const lng = position.coords.longitude;
-          map.setView([lat, lng], 15);
-          marker.setLatLng([lat, lng]);
-          updateLatLng(lat, lng);
-        });
-      }
+      // زر تحديد الموقع
+      document.getElementById('locateMe').addEventListener('click', function() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            map.setView([lat, lng], 17);
+            marker.setLatLng([lat, lng]);
+            updateLatLng(lat, lng);
+            marker.bindPopup("موقعك الحالي").openPopup();
+          }, function(error) {
+            alert("تعذر الحصول على موقعك: " + error.message);
+          });
+        } else {
+          alert("المتصفح لا يدعم خدمة الموقع الجغرافي");
+        }
+      });
 
-      marker.on('dragend', function () {
+      marker.on('dragend', function() {
         const latlng = marker.getLatLng();
         updateLatLng(latlng.lat, latlng.lng);
+        marker.bindPopup("موقع التوصيل المحدد").openPopup();
       });
     }
 
@@ -98,17 +321,37 @@
       try {
         const res = await fetch(`${API_BASE_URL}/public/stores`);
         const data = await res.json();
+        
+        if (data.length === 0) {
+          select.innerHTML = '<option value="">لا توجد محلات متاحة</option>';
+          return;
+        }
+        
         select.innerHTML = '<option value="">اختر محلًا</option>';
         data.forEach(store => {
-          select.innerHTML += `<option value="${store.id}">${store.name}</option>`;
+          const option = document.createElement('option');
+          option.value = store.id;
+          option.textContent = store.name;
+          select.appendChild(option);
         });
       } catch (err) {
         select.innerHTML = '<option value="">فشل تحميل المحلات</option>';
+        console.error('Error loading stores:', err);
       }
     }
 
-    document.getElementById("orderForm").addEventListener("submit", async function (e) {
+    document.getElementById("orderForm").addEventListener("submit", async function(e) {
       e.preventDefault();
+      
+      const submitBtn = document.querySelector('#orderForm button[type="submit"]');
+      const spinner = document.getElementById('spinner');
+      const submitText = document.getElementById('submitText');
+      
+      // عرض زر التحميل
+      spinner.style.display = 'inline-block';
+      submitText.textContent = 'جاري إرسال الطلب...';
+      submitBtn.disabled = true;
+      
       const name = document.getElementById("name").value;
       const phone = document.getElementById("phone").value;
       const store_id = document.getElementById("store").value;
@@ -121,19 +364,50 @@
         const res = await fetch(`${API_BASE_URL}/public/order`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ customer_name: name, customer_phone: phone, store_id, order_text, notes, lat, lng })
+          body: JSON.stringify({ 
+            customer_name: name, 
+            customer_phone: phone, 
+            store_id, 
+            order_text, 
+            notes, 
+            lat, 
+            lng 
+          })
         });
 
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "حدث خطأ أثناء إرسال الطلب");
 
-        document.getElementById("alert").innerHTML = `<div class="alert alert-success text-center">✅ تم إرسال الطلب بنجاح!</div>`;
+        document.getElementById("alert").innerHTML = `
+          <div class="alert alert-success animate__animated animate__fadeIn">
+            <i class="fas fa-check-circle"></i> تم إرسال الطلب بنجاح! سنتصل بك قريبًا
+          </div>
+        `;
+        
         document.getElementById("orderForm").reset();
         marker.setLatLng([24.7136, 46.6753]);
         map.setView([24.7136, 46.6753], 13);
         updateLatLng(24.7136, 46.6753);
+        
+        // إخفاء التنبيه بعد 5 ثواني
+        setTimeout(() => {
+          const alert = document.getElementById("alert");
+          if (alert) {
+            alert.querySelector('.alert').classList.add('animate__fadeOut');
+            setTimeout(() => alert.innerHTML = '', 500);
+          }
+        }, 5000);
       } catch (err) {
-        document.getElementById("alert").innerHTML = `<div class="alert alert-danger text-center">${err.message}</div>`;
+        document.getElementById("alert").innerHTML = `
+          <div class="alert alert-danger animate__animated animate__fadeIn">
+            <i class="fas fa-exclamation-circle"></i> ${err.message}
+          </div>
+        `;
+      } finally {
+        // إعادة زر الإرسال إلى حالته الأصلية
+        spinner.style.display = 'none';
+        submitText.textContent = 'إرسال الطلب';
+        submitBtn.disabled = false;
       }
     });
 
