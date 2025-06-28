@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>طلبات المحل</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .badge-status {
+      padding: 6px 12px;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      color: #fff;
+    }
+    #mapModal .modal-dialog {
+      max-width: 800px;
+    }
+    #map {
+      height: 400px;
+    }
+    .order-card {
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      transition: 0.2s;
+    }
+    .order-card:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    nav {
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="dashboard.html">لوحة تحكم المحل</a>
+      <button class="btn btn-outline-light" onclick="logout()">تسجيل خروج</button>
+    </div>
+  </nav>
+
+  <div class="container my-4">
+    <h4 class="text-center mb-4">طلبات المحل</h4>
+
+    <select id="statusFilter" class="form-select w-50 mx-auto mb-4" onchange="filterOrders(this.value)">
+      <option value="">كل الحالات</option>
+      <option value="جديد">جديد</option>
+      <option value="قيد التجهيز">قيد التجهيز</option>
+      <option value="قيد التوصيل">قيد التوصيل</option>
+      <option value="تم التوصيل">تم التوصيل</option>
+      <option value="تم الإلغاء">تم الإلغاء</option>
+    </select>
+
+    <div id="ordersContainer"></div>
+  </div>
+
+  <!-- نافذة عرض الموقع -->
+  <div class="modal fade" id="mapModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content p-3">
+        <div id="map"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../assets/js/env.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const token = localStorage.getItem("store_token");
+    if (!token) window.location.href = "login.html";
+
+    let allOrders = [];
+
+    async function fetchStoreOrders() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/store/orders`, {
+          headers: { Authorization: "Bearer " + token }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "فشل تحميل الطلبات");
+        allOrders = data;
+        renderOrders(allOrders);
+      } catch (err) {
+        document.getElementById("ordersContainer").innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+      }
+    }
+
+    function renderOrders(orders) {
+      const container = document.getElementById("ordersContainer");
+      container.innerHTML = "";
+      orders.forEach(order => {
+        const color = getStatusColor(order.status);
+        container.innerHTML += `
+          <div class="card mb-3 order-card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">${order.customer_name} - ${order.customer_phone}</h5>
+                <span class="badge-status" style="background-color: ${color};">${order.status}</span>
+              </div>
+              <p class="mb-2">${order.order_text}</p>
+              <div class="d-flex gap-2 flex-wrap">
+                ${order.status === "جديد" ? `<button class="btn btn-warning btn-sm" onclick="markPreparing(${order.id})">قيد التجهيز</button>` : ""}
+                ${order.status === "قيد التجهيز" ? `<button class="btn btn-success btn-sm" onclick="assignRider(${order.id})">إرسال لمندوب</button>` : ""}
+                <button class="btn btn-outline-primary btn-sm" onclick="viewLocation(${order.lat}, ${order.lng})">عرض الموقع</button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function getStatusColor(status) {
+      const colors = {
+        "جديد": "#2196f3",
+        "قيد التجهيز": "#ff9800",
+        "قيد التوصيل": "#9c27b0",
+        "تم التوصيل": "#4caf50",
+        "تم الإلغاء": "#f44336"
+      };
+      return colors[status] || "#6c757d";
+    }
+
+    function filterOrders(status) {
+      if (!status) return renderOrders(allOrders);
+      const filtered = allOrders.filter(order => order.status === status);
+      renderOrders(filtered);
+    }
+
+    async function markPreparing(orderId) {
+      if (!confirm("هل تريد نقل الطلب إلى 'قيد التجهيز'؟")) return;
+      await updateOrderStatus(orderId, "قيد التجهيز");
+    }
+
+    async function assignRider(orderId) {
+      const amount = prompt("أدخل مبلغ الطلب:");
+      if (!amount || isNaN(amount)) return alert("الرجاء إدخال مبلغ صالح");
+      try {
+        const res = await fetch(`${API_BASE_URL}/store/assign/${orderId}`, {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ amount })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "فشل الإرسال");
+        alert("📦 تم إرسال الطلب للمندوب بنجاح");
+        fetchStoreOrders();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function updateOrderStatus(orderId, status) {
+      try {
+        const res = await fetch(`${API_BASE_URL}/store/status/${orderId}`, {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ status })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "فشل التحديث");
+        fetchStoreOrders();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    function viewLocation(lat, lng) {
+      const modalEl = document.getElementById('mapModal');
+      const modal = new bootstrap.Modal(modalEl);
+      modal.show();
+
+      modalEl.addEventListener("shown.bs.modal", () => {
+        const mapContainer = document.getElementById("map");
+        mapContainer.innerHTML = ""; // إعادة ضبط الخريطة
+        const map = L.map('map').setView([lat, lng], 16);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: 'OpenStreetMap contributors'
+        }).addTo(map);
+        L.marker([lat, lng]).addTo(map);
+      }, { once: true });
+    }
+
+    function logout() {
+      localStorage.removeItem("store_token");
+      window.location.href = "login.html";
+    }
+
+    fetchStoreOrders();
+  </script>
+</body>
+</html>

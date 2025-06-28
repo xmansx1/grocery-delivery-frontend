@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>إدارة الطلبات - المشرف</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .status-badge {
+      padding: 5px 10px;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 0.85rem;
+    }
+    .جديد { background-color: #2196f3; }
+    .جاري { background-color: #ff9800; }
+    .توصيل { background-color: #9c27b0; }
+    .تم { background-color: #4caf50; }
+    .ملغي { background-color: #f44336; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="dashboard.html">لوحة المشرف</a>
+      <button class="btn btn-outline-light" onclick="logout()">تسجيل خروج</button>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4>جميع الطلبات</h4>
+      <select id="storeFilter" class="form-select w-auto" onchange="filterByStore()">
+        <option value="all">كل المحلات</option>
+      </select>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-bordered bg-white shadow align-middle">
+        <thead class="table-dark">
+          <tr>
+            <th>اسم العميل</th>
+            <th>رقم الجوال</th>
+            <th>المحل</th>
+            <th>الطلب</th>
+            <th>الملاحظات</th>
+            <th>الموقع</th>
+            <th>المندوب</th>
+            <th>المبلغ</th>
+            <th>الحالة</th>
+            <th>الإجراء</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="../assets/js/env.js"></script>
+  <script>
+    const token = localStorage.getItem("admin_token");
+    if (!token) location.href = "login.html";
+
+    const headers = { "Authorization": `Bearer ${token}` };
+    let allOrders = [];
+
+    function logout() {
+      localStorage.removeItem("admin_token");
+      location.href = "login.html";
+    }
+
+    async function fetchOrders() {
+      const res = await fetch(`${API_BASE_URL}/admin/orders`, { headers });
+      allOrders = await res.json();
+      renderOrders(allOrders);
+    }
+
+    async function fetchStores() {
+      const res = await fetch(`${API_BASE_URL}/admin/stores`, { headers });
+      const stores = await res.json();
+      const select = document.getElementById("storeFilter");
+      stores.forEach(store => {
+        const option = document.createElement("option");
+        option.value = store.name;
+        option.textContent = store.name;
+        select.appendChild(option);
+      });
+    }
+
+    function filterByStore() {
+      const selected = document.getElementById("storeFilter").value;
+      const filtered = selected === "all" ? allOrders : allOrders.filter(o => o.store_name === selected);
+      renderOrders(filtered);
+    }
+
+    function renderOrders(orders) {
+      const table = document.getElementById("ordersTable");
+      table.innerHTML = orders.map(order => `
+        <tr>
+          <td>${order.customer_name}</td>
+          <td>${order.customer_phone}</td>
+          <td>${order.store_name || '-'}</td>
+          <td>${order.order_text}</td>
+          <td>${order.notes || '-'}</td>
+          <td>
+            <a class="btn btn-sm btn-outline-primary" target="_blank"
+              href="https://maps.google.com/?q=${order.lat},${order.lng}">
+              عرض
+            </a>
+          </td>
+          <td>${order.rider_name || '-'}</td>
+          <td>${order.amount || '-'} ريال</td>
+          <td><span class="status-badge ${getStatusClass(order.status)}">${order.status}</span></td>
+          <td>
+            <select class="form-select form-select-sm" onchange="changeStatus(${order.id}, this.value)">
+              <option disabled selected>تغيير</option>
+              <option value="جديد">جديد</option>
+              <option value="جاري التجهيز">جاري التجهيز</option>
+              <option value="خرج للتوصيل">خرج للتوصيل</option>
+              <option value="تم التوصيل">تم التوصيل</option>
+              <option value="تم الإلغاء">تم الإلغاء</option>
+            </select>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    function getStatusClass(status) {
+      if (status.includes("جديد")) return "جديد";
+      if (status.includes("تجهيز")) return "جاري";
+      if (status.includes("توصيل")) return "توصيل";
+      if (status.includes("تم")) return "تم";
+      if (status.includes("إلغاء")) return "ملغي";
+      return "";
+    }
+
+    async function changeStatus(orderId, status) {
+      await fetch(`${API_BASE_URL}/orders/${orderId}/status`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          ...headers
+        },
+        body: JSON.stringify({ status })
+      });
+      fetchOrders();
+    }
+
+    window.onload = async () => {
+      await fetchStores();
+      await fetchOrders();
+    };
+  </script>
+</body>
+</html>

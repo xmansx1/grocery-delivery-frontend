@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>نموذج الطلب</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    #map {
+      height: 400px;
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-5">
+    <h2 class="text-center mb-4">نموذج الطلب</h2>
+    <form id="orderForm" class="bg-white p-4 rounded shadow">
+      <div class="mb-3">
+        <label for="name" class="form-label">الاسم</label>
+        <input type="text" class="form-control" id="name" required />
+      </div>
+      <div class="mb-3">
+        <label for="phone" class="form-label">رقم الجوال</label>
+        <input type="tel" class="form-control" id="phone" required />
+      </div>
+      <div class="mb-3">
+        <label for="store" class="form-label">اختيار المحل</label>
+        <select class="form-select" id="store" required>
+          <option value="">جاري التحميل...</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <label for="order" class="form-label">تفاصيل الطلب</label>
+        <textarea class="form-control" id="order" rows="3" required></textarea>
+      </div>
+      <div class="mb-3">
+        <label for="notes" class="form-label">ملاحظات إضافية</label>
+        <textarea class="form-control" id="notes" rows="2"></textarea>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">تحديد موقعك</label>
+        <div id="map"></div>
+        <input type="hidden" id="lat" name="lat">
+        <input type="hidden" id="lng" name="lng">
+      </div>
+      <button type="submit" class="btn btn-primary w-100">إرسال الطلب</button>
+    </form>
+    <div id="alert" class="mt-3"></div>
+  </div>
+
+  <script src="./assets/js/env.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    let map, marker;
+
+    // 🗺️ إعداد الخريطة
+    function initMap() {
+      const defaultCoords = [24.7136, 46.6753];
+      map = L.map('map').setView(defaultCoords, 13);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+
+      marker = L.marker(defaultCoords, { draggable: true }).addTo(map);
+      updateLatLng(defaultCoords[0], defaultCoords[1]);
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          map.setView([lat, lng], 15);
+          marker.setLatLng([lat, lng]);
+          updateLatLng(lat, lng);
+        });
+      }
+
+      marker.on('dragend', function () {
+        const latlng = marker.getLatLng();
+        updateLatLng(latlng.lat, latlng.lng);
+      });
+    }
+
+    function updateLatLng(lat, lng) {
+      document.getElementById('lat').value = lat;
+      document.getElementById('lng').value = lng;
+    }
+
+    // 📦 جلب المحلات من API
+    async function loadStores() {
+      const select = document.getElementById("store");
+      try {
+        const res = await fetch(`${API_BASE_URL}/public/stores`);
+        const data = await res.json();
+        select.innerHTML = '<option value="">اختر محلًا</option>';
+        data.forEach(store => {
+          select.innerHTML += `<option value="${store.id}">${store.name}</option>`;
+        });
+      } catch (err) {
+        select.innerHTML = '<option value="">فشل تحميل المحلات</option>';
+      }
+    }
+
+    // 📤 إرسال الطلب
+    document.getElementById("orderForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const name = document.getElementById("name").value;
+      const phone = document.getElementById("phone").value;
+      const store_id = document.getElementById("store").value;
+      const order_text = document.getElementById("order").value;
+      const notes = document.getElementById("notes").value;
+      const lat = document.getElementById("lat").value;
+      const lng = document.getElementById("lng").value;
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/public/order`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ customer_name: name, customer_phone: phone, store_id, order_text, notes, lat, lng })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "حدث خطأ أثناء إرسال الطلب");
+
+        document.getElementById("alert").innerHTML = `<div class="alert alert-success text-center">✅ تم إرسال الطلب بنجاح!</div>`;
+        document.getElementById("orderForm").reset();
+        marker.setLatLng([24.7136, 46.6753]);
+        map.setView([24.7136, 46.6753], 13);
+        updateLatLng(24.7136, 46.6753);
+      } catch (err) {
+        document.getElementById("alert").innerHTML = `<div class="alert alert-danger text-center">${err.message}</div>`;
+      }
+    });
+
+    window.onload = () => {
+      initMap();
+      loadStores();
+    };
+  </script>
+</body>
+</html>

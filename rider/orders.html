@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>طلبات المندوب</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .order-card {
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      padding: 15px;
+      background-color: #fff;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      margin-bottom: 15px;
+    }
+    .status-select {
+      width: 150px;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <div class="container-fluid">
+      <span class="navbar-brand">طلبات المندوب</span>
+      <button class="btn btn-outline-light" onclick="logout()">تسجيل خروج</button>
+    </div>
+  </nav>
+
+  <div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <div>
+        <h5>مرحبًا، <span id="riderName">...</span></h5>
+        <span>الحالة:
+          <select id="riderStatus" class="form-select d-inline-block status-select ms-2">
+            <option value="متاح">متاح ✅</option>
+            <option value="مشغول">مشغول ⏳</option>
+          </select>
+        </span>
+      </div>
+      <div>
+        <span class="badge bg-success fs-6">
+          عدد الطلبات التي تم تسليمها: <span id="deliveredCount">0</span>
+        </span>
+      </div>
+    </div>
+
+    <div id="ordersContainer">
+      <!-- الطلبات تظهر هنا -->
+    </div>
+  </div>
+
+  <script src="../assets/js/env.js"></script>
+  <script>
+    const token = localStorage.getItem("rider_token");
+    if (!token) window.location.href = "login.html";
+
+    let deliveredCount = 0;
+
+    async function fetchRiderOrders() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/rider/orders`, {
+          headers: { Authorization: "Bearer " + token }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "فشل تحميل الطلبات");
+        renderOrders(data);
+      } catch (err) {
+        document.getElementById("ordersContainer").innerHTML = `<div class="alert alert-danger">${err.message}</div>`;
+      }
+    }
+
+    async function markDelivered(orderId) {
+      if (!confirm("هل تريد تأكيد تسليم الطلب؟")) return;
+      try {
+        const res = await fetch(`${API_BASE_URL}/rider/deliver/${orderId}`, {
+          method: "POST",
+          headers: { Authorization: "Bearer " + token }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "فشل التحديث");
+        deliveredCount++;
+        document.getElementById("deliveredCount").innerText = deliveredCount;
+        fetchRiderOrders();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    async function cancelOrder(orderId) {
+      if (!confirm("هل تريد إلغاء هذا الطلب؟")) return;
+      try {
+        const res = await fetch(`${API_BASE_URL}/rider/cancel/${orderId}`, {
+          method: "POST",
+          headers: { Authorization: "Bearer " + token }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "فشل الإلغاء");
+        fetchRiderOrders();
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    function renderOrders(orders) {
+      const container = document.getElementById("ordersContainer");
+      container.innerHTML = "";
+      orders.forEach(order => {
+        const card = document.createElement("div");
+        card.className = "order-card";
+        card.innerHTML = `
+          <div class="d-flex justify-content-between">
+            <h5>${order.customer_name}</h5>
+            <span class="text-muted">${order.customer_phone}</span>
+          </div>
+          <p class="mb-1">📦 <strong>الطلب:</strong> ${order.order_text}</p>
+          <p class="mb-1">📝 <strong>ملاحظات:</strong> ${order.notes || '-'}</p>
+          <p class="mb-1">💰 <strong>المبلغ:</strong> ${order.amount || 0} ريال</p>
+          <div class="d-flex flex-wrap gap-2 mt-2">
+            <a href="https://maps.google.com/?q=${order.lat},${order.lng}" target="_blank" class="btn btn-sm btn-outline-primary">عرض الموقع</a>
+            <a href="tel:${order.customer_phone}" class="btn btn-sm btn-outline-success">اتصال</a>
+            <a href="https://wa.me/966${order.customer_phone.slice(1)}?text=مرحبًا، طلبك في الطريق إليك!" target="_blank" class="btn btn-sm btn-outline-success">واتساب</a>
+            <button class="btn btn-sm btn-outline-dark" onclick="markDelivered(${order.id})">تم التوصيل</button>
+            <button class="btn btn-sm btn-outline-danger" onclick="cancelOrder(${order.id})">إلغاء</button>
+          </div>`;
+        container.appendChild(card);
+      });
+    }
+
+    function logout() {
+      localStorage.removeItem("rider_token");
+      localStorage.removeItem("rider_name");
+      window.location.href = "login.html";
+    }
+
+    function initRider() {
+      const name = localStorage.getItem("rider_name") || "مندوب";
+      document.getElementById("riderName").innerText = name;
+      const savedStatus = localStorage.getItem("rider_status") || "متاح";
+      document.getElementById("riderStatus").value = savedStatus;
+    }
+
+    document.getElementById("riderStatus").addEventListener("change", function () {
+      const status = this.value;
+      localStorage.setItem("rider_status", status);
+    });
+
+    window.onload = () => {
+      initRider();
+      fetchRiderOrders();
+    };
+  </script>
+</body>
+</html>

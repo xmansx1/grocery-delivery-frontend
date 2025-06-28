@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>إعدادات المحل</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .settings-card {
+      max-width: 600px;
+      margin: 50px auto;
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 15px rgba(0,0,0,0.05);
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="dashboard.html">لوحة تحكم المحل</a>
+      <button class="btn btn-outline-light" onclick="logout()">تسجيل خروج</button>
+    </div>
+  </nav>
+
+  <div class="settings-card">
+    <h4 class="mb-4 text-center">إعدادات المحل</h4>
+    <form id="storeSettingsForm">
+      <div class="mb-3">
+        <label class="form-label">اسم المحل</label>
+        <input type="text" class="form-control" id="storeName" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">رقم الجوال</label>
+        <input type="tel" class="form-control" id="storePhone" disabled>
+      </div>
+      <div class="mb-3 form-check form-switch">
+        <input class="form-check-input" type="checkbox" id="storeActive">
+        <label class="form-check-label" for="storeActive">استقبال الطلبات (تشغيل / إيقاف)</label>
+      </div>
+      <hr>
+      <h6 class="mb-3">تغيير كلمة المرور</h6>
+      <div class="mb-3">
+        <input type="password" class="form-control" placeholder="كلمة المرور الجديدة" id="newPassword">
+      </div>
+      <div class="mb-3">
+        <input type="password" class="form-control" placeholder="تأكيد كلمة المرور" id="confirmPassword">
+      </div>
+      <button type="submit" class="btn btn-primary w-100">💾 حفظ التغييرات</button>
+    </form>
+  </div>
+
+  <script src="../assets/js/env.js"></script>
+  <script>
+    const token = localStorage.getItem("store_token");
+    if (!token) window.location.href = "login.html";
+
+    const storeNameInput = document.getElementById("storeName");
+    const storePhoneInput = document.getElementById("storePhone");
+    const storeActiveInput = document.getElementById("storeActive");
+
+    async function loadStoreInfo() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/store/profile`, {
+          headers: { Authorization: "Bearer " + token }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "خطأ في تحميل البيانات");
+
+        storeNameInput.value = data.name;
+        storePhoneInput.value = data.phone;
+        storeActiveInput.checked = data.is_active;
+      } catch (err) {
+        alert(err.message);
+      }
+    }
+
+    document.getElementById("storeSettingsForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const name = storeNameInput.value;
+      const is_active = storeActiveInput.checked;
+      const newPassword = document.getElementById("newPassword").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      if (newPassword && newPassword !== confirmPassword) {
+        alert("❌ تأكيد كلمة المرور غير مطابق");
+        return;
+      }
+
+      try {
+        const res = await fetch(`${API_BASE_URL}/store/update`, {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            name,
+            is_active,
+            password: newPassword || null
+          })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.detail || "فشل التحديث");
+
+        alert("✅ تم حفظ الإعدادات بنجاح!");
+        document.getElementById("newPassword").value = "";
+        document.getElementById("confirmPassword").value = "";
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    function logout() {
+      localStorage.removeItem("store_token");
+      window.location.href = "login.html";
+    }
+
+    loadStoreInfo();
+  </script>
+</body>
+</html>
