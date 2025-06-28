@@ -157,7 +157,7 @@ async function updateStatus(orderId, status) {
 async function openAssignModal(orderId) {
   selectedOrderId = orderId;
   try {
-    const res = await fetch(`${API_BASE_URL}/store/riders`, {
+    const res = await fetch(`${API_BASE_URL}/store/available-riders`, {
       headers: { Authorization: "Bearer " + token }
     });
 
