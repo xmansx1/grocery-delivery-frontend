@@ -137,7 +137,7 @@
       }
 
       async function fetchRiders() {
-        const res = await fetch(`${API_BASE_URL}/riders/available`, {
+        const res = await fetch(`${API_BASE_URL}/store/available-riders`, {
           headers,
         });
         const data = await res.json();

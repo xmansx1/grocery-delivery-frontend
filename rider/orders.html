@@ -72,7 +72,7 @@
 
       async function fetchRiderOrders() {
         try {
-          const res = await fetch(`${API_BASE_URL}/store/available-riders`, {
+          const res = await fetch(`${API_BASE_URL}/rider/orders`, {
             headers: { Authorization: "Bearer " + token },
           });
 
