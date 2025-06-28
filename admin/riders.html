@@ -79,10 +79,14 @@
 <!-- ✅ سكربتات -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/env.js"></script>
+<!-- ✅ تم الإبقاء على نفس الهيكل مع تعديلات محسّنة -->
 <script>
   const adminToken = localStorage.getItem("admin_token");
 
   if (!adminToken) window.location.href = "login.html";
+  if (typeof API_BASE_URL === "undefined") {
+    alert("❌ لم يتم تحميل ملف env.js أو أن متغير API_BASE_URL غير معرف");
+  }
 
   function logout() {
     localStorage.removeItem("token");
@@ -118,6 +122,12 @@
   function renderRiders(riders) {
     const table = document.getElementById("ridersTable");
     table.innerHTML = "";
+
+    if (riders.length === 0) {
+      table.innerHTML = `<tr><td colspan="4" class="text-center text-muted">لا يوجد مناديب حالياً</td></tr>`;
+      return;
+    }
+
     riders.forEach(rider => {
       const row = document.createElement("tr");
       row.innerHTML = `
