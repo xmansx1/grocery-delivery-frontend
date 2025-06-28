@@ -16,6 +16,7 @@
       justify-content: center;
       padding: 20px;
     }
+
     .login-container {
       background-color: #fff;
       padding: 40px 30px;
@@ -24,23 +25,28 @@
       width: 100%;
       max-width: 450px;
     }
+
     .login-container h3 {
       margin-bottom: 25px;
       color: #333;
       text-align: center;
     }
+
     .login-container img {
       display: block;
       margin: 0 auto 20px;
       width: 80px;
     }
+
     .form-label {
       font-weight: bold;
     }
+
     .btn-primary {
       background-color: #007bff;
       border: none;
     }
+
     .btn-primary:hover {
       background-color: #0056b3;
     }
@@ -85,50 +91,43 @@
 
       const phone = document.getElementById("phone").value.trim();
       const password = document.getElementById("password").value;
-      const userType = document.getElementById("userType").value;
+      const userTypeElement = document.getElementById("userType");
 
-      if (!userType) {
+      if (!userTypeElement || !userTypeElement.value) {
         document.getElementById("error").textContent = "يرجى اختيار نوع المستخدم";
         document.getElementById("error").style.display = "block";
         return;
       }
 
+      const userType = userTypeElement.value;
       let endpoint = "";
-      let payload = {};
       let redirectPath = "";
+      let payload = { phone, password };
 
-      if (userType === "admin") {
+      if (userType === "admin" || userType === "store") {
+        payload.user_type = userType; // ✅ هذا هو المطلوب لحل مشكلة 422
         endpoint = "/auth/login";
-        payload = { phone, password, user_type: "admin" };
-        redirectPath = "admin/dashboard.html";
-      } else if (userType === "store") {
-        endpoint = "/auth/store-login";
-        payload = { phone, password };
-        redirectPath = "store/order.html";
+        redirectPath = userType === "admin" ? "admin/dashboard.html" : "store/order.html";
       } else if (userType === "rider") {
         endpoint = "/auth/rider-login";
-        payload = { phone, password };
         redirectPath = "rider/orders.html";
       }
 
       try {
-        const res = await fetch(`${API_BASE_URL}${endpoint}`, {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
 
-        const data = await res.json();
+        const data = await response.json();
 
-        if (!res.ok) {
-          if (Array.isArray(data.detail)) {
-            const msgs = data.detail.map(item => item.msg).join("، ");
-            throw new Error(msgs);
-          } else {
-            throw new Error(data.detail || "فشل تسجيل الدخول");
-          }
+        if (!response.ok) {
+          const errorDetail = data.detail || "فشل تسجيل الدخول";
+          throw new Error(typeof errorDetail === "string" ? errorDetail : JSON.stringify(errorDetail));
         }
 
+        // حفظ التوكن
         if (userType === "admin") {
           localStorage.setItem("token", data.access_token);
         } else if (userType === "store") {
