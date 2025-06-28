@@ -39,8 +39,8 @@
         <h5>مرحبًا، <span id="riderName">...</span></h5>
         <span>الحالة:
           <select id="riderStatus" class="form-select d-inline-block status-select ms-2">
-            <option value="متاح">متاح ✅</option>
-            <option value="مشغول">مشغول ⏳</option>
+            <option value="متاح ✅">متاح ✅</option>
+            <option value="مشغول ⏳">مشغول ⏳</option>
           </select>
         </span>
       </div>
@@ -51,17 +51,13 @@
       </div>
     </div>
 
-    <div id="ordersContainer">
-      <!-- الطلبات تظهر هنا -->
-    </div>
+    <div id="ordersContainer"></div>
   </div>
 
   <script src="../assets/js/env.js"></script>
   <script>
     const token = localStorage.getItem("rider_token");
     if (!token) window.location.href = "login.html";
-
-    let deliveredCount = 0;
 
     async function fetchRiderOrders() {
       try {
@@ -76,18 +72,33 @@
       }
     }
 
-    async function markDelivered(orderId) {
-      if (!confirm("هل تريد تأكيد تسليم الطلب؟")) return;
+    async function fetchDeliveredCount() {
       try {
-        const res = await fetch(`${API_BASE_URL}/rider/deliver/${orderId}`, {
-          method: "POST",
+        const res = await fetch(`${API_BASE_URL}/rider/orders/delivered-count`, {
           headers: { Authorization: "Bearer " + token }
         });
         const data = await res.json();
+        if (!res.ok) throw new Error("فشل في جلب عدد الطلبات");
+        document.getElementById("deliveredCount").innerText = data.delivered;
+      } catch (err) {
+        console.error(err.message);
+      }
+    }
+
+    async function markDelivered(orderId) {
+      if (!confirm("هل تريد تأكيد تسليم الطلب؟")) return;
+      try {
+        const res = await fetch(`${API_BASE_URL}/rider/orders/${orderId}/status?status=تم التوصيل`, {
+          method: "PUT",
+          headers: {
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json"
+          }
+        });
+        const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "فشل التحديث");
-        deliveredCount++;
-        document.getElementById("deliveredCount").innerText = deliveredCount;
         fetchRiderOrders();
+        fetchDeliveredCount();
       } catch (err) {
         alert(err.message);
       }
@@ -96,13 +107,17 @@
     async function cancelOrder(orderId) {
       if (!confirm("هل تريد إلغاء هذا الطلب؟")) return;
       try {
-        const res = await fetch(`${API_BASE_URL}/rider/cancel/${orderId}`, {
-          method: "POST",
-          headers: { Authorization: "Bearer " + token }
+        const res = await fetch(`${API_BASE_URL}/rider/orders/${orderId}/status?status=تم الإلغاء`, {
+          method: "PUT",
+          headers: {
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json"
+          }
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail || "فشل الإلغاء");
         fetchRiderOrders();
+        fetchDeliveredCount();
       } catch (err) {
         alert(err.message);
       }
@@ -111,6 +126,11 @@
     function renderOrders(orders) {
       const container = document.getElementById("ordersContainer");
       container.innerHTML = "";
+      if (orders.length === 0) {
+        container.innerHTML = `<div class="alert alert-info text-center">لا توجد طلبات حالياً</div>`;
+        return;
+      }
+
       orders.forEach(order => {
         const card = document.createElement("div");
         card.className = "order-card";
@@ -142,7 +162,7 @@
     function initRider() {
       const name = localStorage.getItem("rider_name") || "مندوب";
       document.getElementById("riderName").innerText = name;
-      const savedStatus = localStorage.getItem("rider_status") || "متاح";
+      const savedStatus = localStorage.getItem("rider_status") || "متاح ✅";
       document.getElementById("riderStatus").value = savedStatus;
     }
 
@@ -154,6 +174,7 @@
     window.onload = () => {
       initRider();
       fetchRiderOrders();
+      fetchDeliveredCount();
     };
   </script>
 </body>
