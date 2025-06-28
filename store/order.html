@@ -183,9 +183,12 @@
           const data = await res.json();
           if (!res.ok) throw new Error(data.detail || "فشل تحديث الحالة");
 
-          // ✅ إضافة فتح رابط واتساب للعميل عند قيد التجهيز
+          // ✅ فتح واتساب للعميل إذا الرد يحتوي على الرابط
           if (status === "قيد التجهيز" && data.whatsapp_link) {
-            window.open(data.whatsapp_link, "_blank");
+            const a = document.createElement("a");
+            a.href = data.whatsapp_link;
+            a.target = "_blank";
+            a.click();
           }
 
           fetchStoreOrders();
