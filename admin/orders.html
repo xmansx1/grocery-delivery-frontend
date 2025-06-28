@@ -86,11 +86,11 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/env.js"></script>
     <script>
-      const token = localStorage.getItem("token");
+      const adminToken = localStorage.getItem("admin_token");
 
-      if (!token) location.href = "login.html";
+      if (!adminToken) location.href = "login.html";
 
-      const headers = { Authorization: `Bearer ${token}` };
+      const headers = { Authorization: `Bearer ${adminToken}` };
       let allOrders = [];
 
       function logout() {
@@ -111,7 +111,7 @@
       }
 
       async function fetchStores() {
-        const res = await fetch(`${API_BASE_URL}/admin/stores`, { headers });
+        const res = await fetch(`${API_BASE_URL}/stores`, { headers });
         const stores = await res.json();
         const select = document.getElementById("storeFilter");
         stores.forEach((store) => {
