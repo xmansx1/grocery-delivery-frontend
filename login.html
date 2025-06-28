@@ -50,17 +50,6 @@
     .btn-primary:hover {
       background-color: #0056b3;
     }
-
-    .ad-box {
-      background-color: #f8f9fa;
-      padding: 12px;
-      border: 1px dashed #aaa;
-      border-radius: 10px;
-      font-size: 0.95rem;
-      color: #333;
-      margin-top: 20px;
-      text-align: center;
-    }
   </style>
 </head>
 <body>
@@ -93,16 +82,10 @@
 
       <button type="submit" class="btn btn-primary w-100">تسجيل الدخول</button>
     </form>
-
-    <!-- ✅ الإعلان -->
-    <div id="loginAdBox" class="ad-box">
-      جاري تحميل إعلان...
-    </div>
   </div>
 
   <script src="assets/js/env.js"></script>
   <script>
-    // ✅ تنفيذ تسجيل الدخول
     document.getElementById("unifiedLoginForm").addEventListener("submit", async function (e) {
       e.preventDefault();
 
@@ -160,22 +143,6 @@
         document.getElementById("error").style.display = "block";
       }
     });
-
-    // ✅ تحميل إعلان عشوائي من الـ API
-    async function loadLoginAd() {
-      try {
-        const res = await fetch(`${API_BASE_URL}/ads`);
-        const ads = await res.json();
-        const activeAd = ads.length ? ads[Math.floor(Math.random() * ads.length)] : null;
-        document.getElementById("loginAdBox").innerHTML = activeAd
-          ? `<strong>${activeAd.title}</strong>: ${activeAd.content}`
-          : "لا توجد إعلانات حالياً.";
-      } catch {
-        document.getElementById("loginAdBox").innerText = "حدث خطأ أثناء تحميل الإعلان.";
-      }
-    }
-
-    loadLoginAd();
   </script>
 </body>
 </html>
