@@ -199,6 +199,8 @@
       window.location.href = "login.html";
     }
 
+    // ✅ تحديث الطلبات كل 10 ثوانٍ تلقائيًا
+    setInterval(fetchStoreOrders, 10000);
     fetchStoreOrders();
   </script>
 </body>
