@@ -47,6 +47,10 @@
         .addEventListener("submit", async function (e) {
           e.preventDefault();
 
+          const errorBox = document.getElementById("error"); // تحديد عنصر الخطأ
+          errorBox.style.display = "none"; // إخفاء أي خطأ سابق
+          errorBox.textContent = "";
+
           const phone = document.getElementById("phone").value.trim();
           const password = document.getElementById("password").value;
 
@@ -67,15 +71,31 @@
 
             const data = await response.json();
 
+            // ✅ إضافة console.logs هنا لتشخيص المشكلة
+            console.log("Response status:", response.status);
+            console.log("Response OK:", response.ok);
+            console.log("Full data from API:", data);
+            console.log("Access Token from API (data.access_token):", data.access_token);
+
+
             if (!response.ok) {
               throw new Error(data.detail || "فشل تسجيل الدخول");
             }
 
             // ✅ تخزين التوكن وإعادة التوجيه
             localStorage.setItem("admin_token", data.access_token);
+            
+            // ✅ التحقق بعد التخزين مباشرة
+            const storedToken = localStorage.getItem("admin_token");
+            console.log("Token stored in localStorage:", storedToken);
+
+            // ✅ إضافة تأخير بسيط للاختبار (للتأكد من حفظ localStorage قبل التوجيه)
+            // هذا السطر مؤقت لأغراض التشخيص، ويمكن إزالته لاحقًا
+            await new Promise(resolve => setTimeout(resolve, 500)); // انتظر 500 مللي ثانية
 
             window.location.href = "dashboard.html";
           } catch (err) {
+            console.error("Error during login fetch:", err); // سجل الخطأ الكامل
             document.getElementById("error").textContent =
               err.message || "خطأ في الاتصال بالخادم";
             document.getElementById("error").style.display = "block";
