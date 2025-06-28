@@ -74,8 +74,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/env.js"></script>
 <script>
-  const token = localStorage.getItem("token");
-  if (!token) window.location.href = "login.html";
+  const adminToken = localStorage.getItem("token");
+  if (!adminToken) window.location.href = "login.html";
 
   function logout() {
     localStorage.removeItem("token");
@@ -91,7 +91,7 @@
   async function loadStores() {
     try {
       const res = await fetch(`${API_BASE_URL}/stores`, {
-        headers: { Authorization: "Bearer " + token }
+        headers: { Authorization: "Bearer " + adminToken }
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "فشل تحميل المحلات");
@@ -131,7 +131,7 @@
     try {
       const res = await fetch(`${API_BASE_URL}/stores/${id}/status?is_active=${!currentStatus}`, {
         method: "PUT",
-        headers: { Authorization: "Bearer " + token }
+        headers: { Authorization: "Bearer " + adminToken }
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "فشل تحديث الحالة");
@@ -146,7 +146,7 @@
     try {
       const res = await fetch(`${API_BASE_URL}/stores/${id}`, {
         method: "DELETE",
-        headers: { Authorization: "Bearer " + token }
+        headers: { Authorization: "Bearer " + adminToken }
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "فشل الحذف");
@@ -156,30 +156,30 @@
     }
   }
 
-document.getElementById("addStoreForm").addEventListener("submit", async function (e) {
-  e.preventDefault();
-  const name = document.getElementById("storeName").value;
-  const phone = document.getElementById("storePhone").value;
-  const password = document.getElementById("storePassword").value;
+  document.getElementById("addStoreForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const name = document.getElementById("storeName").value;
+    const phone = document.getElementById("storePhone").value;
+    const password = document.getElementById("storePassword").value;
 
-  try {
-    const res = await fetch(`${API_BASE_URL}/stores`, {
-      method: "POST",
-      headers: {
-        Authorization: "Bearer " + token,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ name, phone, password, is_active: true })  // ✅ إضافة is_active
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || "فشل الإضافة");
-    bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
-    this.reset();
-    loadStores();
-  } catch (err) {
-    alert("❌ فشل الإضافة: " + err.message);
-  }
-});
+    try {
+      const res = await fetch(`${API_BASE_URL}/stores`, {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + adminToken,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, phone, password, is_active: true })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "فشل الإضافة");
+      bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
+      this.reset();
+      loadStores();
+    } catch (err) {
+      alert("❌ فشل الإضافة: " + err.message);
+    }
+  });
 
   window.onload = loadStores;
 </script>
