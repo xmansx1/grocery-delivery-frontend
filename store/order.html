@@ -157,7 +157,7 @@ async function updateStatus(orderId, status) {
 async function openAssignModal(orderId) {
   selectedOrderId = orderId;
   try {
-    const res = await fetch(`${API_BASE_URL}/store/available-riders`, {
+    const res = await fetch(`${API_BASE_URL}/store/riders`, {
       headers: { Authorization: "Bearer " + token }
     });
 
@@ -172,6 +172,7 @@ async function openAssignModal(orderId) {
       .filter(r => r.status === "متاح ✅")
       .map(r => `<option value="${r.id}">${r.name} - ${r.phone}</option>`)
       .join("");
+
     new bootstrap.Modal(document.getElementById("assignModal")).show();
   } catch (err) {
     alert(err.message);
