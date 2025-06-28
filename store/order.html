@@ -65,10 +65,6 @@
 <script src="../assets/js/env.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-if (typeof API_BASE_URL === 'undefined') {
-  alert("⚠️ لم يتم تحميل env.js أو لم يتم تعريف API_BASE_URL");
-}
-
 const token = localStorage.getItem("store_token");
 if (!token) window.location.href = "/login.html";
 
@@ -80,14 +76,9 @@ async function fetchStoreOrders() {
     const res = await fetch(`${API_BASE_URL}/store/orders`, {
       headers: { Authorization: "Bearer " + token }
     });
-
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.detail || "فشل تحميل الطلبات");
-    }
-
+    if (!res.ok) throw new Error("فشل تحميل الطلبات");
     const data = await res.json();
-    allOrders = data.filter(o => o.status !== "تم التوصيل" && o.status !== "تم الإلغاء" && o.status !== "محذوف");
+    allOrders = data.filter(o => !["تم التوصيل", "تم الإلغاء", "محذوف"].includes(o.status));
     renderOrders(allOrders);
   } catch (err) {
     document.getElementById("ordersContainer").innerHTML = `<div class="alert alert-danger text-center">${err.message}</div>`;
@@ -146,8 +137,11 @@ async function updateStatus(orderId, status) {
       },
       body: JSON.stringify({ status })
     });
-
-    if (!res.ok) throw new Error("فشل تحديث الحالة");
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "فشل تحديث الحالة");
+    if (status === "قيد التجهيز" && data.whatsapp_link) {
+      window.open(data.whatsapp_link, "_blank");
+    }
     fetchStoreOrders();
   } catch (err) {
     alert(err.message);
@@ -160,26 +154,16 @@ async function openAssignModal(orderId) {
     const res = await fetch(`${API_BASE_URL}/store/available-riders`, {
       headers: { Authorization: "Bearer " + token }
     });
-
-    if (!res.ok) {
-      const error = await res.json();
-      throw new Error(error.detail || "فشل جلب المناديب");
-    }
-
     const riders = await res.json();
     const select = document.getElementById("riderSelect");
-
     if (riders.length === 0) {
       select.innerHTML = `<option disabled selected>لا يوجد مناديب متاحين حالياً</option>`;
     } else {
-      select.innerHTML = riders
-        .map(r => `<option value="${r.id}">${r.name} - ${r.phone}</option>`)
-        .join("");
+      select.innerHTML = riders.map(r => `<option value="${r.id}">${r.name} - ${r.phone}</option>`).join("");
     }
-
     new bootstrap.Modal(document.getElementById("assignModal")).show();
   } catch (err) {
-    alert(err.message);
+    alert("فشل تحميل المناديب: " + err.message);
   }
 }
 
@@ -188,8 +172,6 @@ async function confirmAssign() {
   const amount = document.getElementById("amountInput").value;
   if (!riderId || !amount) return alert("يرجى اختيار المندوب وإدخال المبلغ");
 
-  const assignBtn = document.querySelector('#assignModal .btn-success');
-  assignBtn.disabled = true;
   try {
     const res = await fetch(`${API_BASE_URL}/store/assign/${selectedOrderId}`, {
       method: "POST",
@@ -199,18 +181,14 @@ async function confirmAssign() {
       },
       body: JSON.stringify({ rider_id: riderId, amount })
     });
-
     const data = await res.json();
-    if (!res.ok) throw new Error(data.detail || "فشل الإسناد");
-
+    if (!res.ok) throw new Error(data.detail || "فشل إسناد الطلب");
     window.open(data.rider_whatsapp, "_blank");
     window.open(data.customer_whatsapp, "_blank");
-    fetchStoreOrders();
     bootstrap.Modal.getInstance(document.getElementById("assignModal")).hide();
+    fetchStoreOrders();
   } catch (err) {
     alert(err.message);
-  } finally {
-    assignBtn.disabled = false;
   }
 }
 
