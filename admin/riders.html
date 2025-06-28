@@ -1,245 +1,195 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>إدارة المناديب</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-    />
-    <style>
-      body {
-        background-color: #f8f9fa;
-      }
-      .table td,
-      .table th {
-        vertical-align: middle;
-      }
-    </style>
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="dashboard.html">لوحة تحكم المشرف</a>
-        <button class="btn btn-outline-light" onclick="logout()">
-          تسجيل خروج
-        </button>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إدارة المناديب</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+    }
+    .table td, .table th {
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="dashboard.html">لوحة تحكم المشرف</a>
+    <button class="btn btn-outline-light" onclick="logout()">تسجيل خروج</button>
+  </div>
+</nav>
+
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4>إدارة المناديب</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+      <i class="bi bi-plus-circle me-1"></i> إضافة مندوب
+    </button>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered bg-white shadow">
+      <thead class="table-dark">
+        <tr>
+          <th>الاسم</th>
+          <th>رقم الجوال</th>
+          <th>الحالة</th>
+          <th>الخيارات</th>
+        </tr>
+      </thead>
+      <tbody id="ridersTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ✅ نافذة إضافة مندوب -->
+<div class="modal fade" id="addModal" tabindex="-1">
+  <div class="modal-dialog">
+    <form class="modal-content" id="addRiderForm">
+      <div class="modal-header">
+        <h5 class="modal-title">إضافة مندوب</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-    </nav>
-
-    <div class="container py-4">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h4>إدارة المناديب</h4>
-        <button
-          class="btn btn-primary"
-          data-bs-toggle="modal"
-          data-bs-target="#addModal"
-        >
-          <i class="bi bi-plus-circle me-1"></i> إضافة مندوب
-        </button>
+      <div class="modal-body">
+        <label class="form-label">الاسم</label>
+        <input type="text" class="form-control mb-2" id="riderName" required />
+        <label class="form-label">رقم الجوال</label>
+        <input type="tel" class="form-control mb-2" id="riderPhone" required />
+        <label class="form-label">كلمة المرور</label>
+        <input type="password" class="form-control mb-2" id="riderPassword" required />
+        <label class="form-label">الحالة</label>
+        <select class="form-select" id="riderStatus">
+          <option value="متاح ✅">متاح ✅</option>
+          <option value="مشغول ⏳">مشغول ⏳</option>
+          <option value="موقوف ⛔️">موقوف ⛔️</option>
+        </select>
       </div>
-
-      <div class="table-responsive">
-        <table class="table table-bordered bg-white shadow">
-          <thead class="table-dark">
-            <tr>
-              <th>الاسم</th>
-              <th>رقم الجوال</th>
-              <th>الحالة</th>
-              <th>الخيارات</th>
-            </tr>
-          </thead>
-          <tbody id="ridersTable">
-            <!-- سيتم إدراج المناديب هنا -->
-          </tbody>
-        </table>
+      <div class="modal-footer">
+        <button class="btn btn-primary" type="submit">إضافة</button>
       </div>
-    </div>
+    </form>
+  </div>
+</div>
 
-    <!-- ✅ نافذة إضافة مندوب -->
-    <div class="modal fade" id="addModal" tabindex="-1">
-      <div class="modal-dialog">
-        <form class="modal-content" id="addRiderForm">
-          <div class="modal-header">
-            <h5 class="modal-title">إضافة مندوب</h5>
-            <button class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <label class="form-label">الاسم</label>
-            <input
-              type="text"
-              class="form-control mb-2"
-              id="riderName"
-              required
-            />
-            <label class="form-label">رقم الجوال</label>
-            <input
-              type="tel"
-              class="form-control mb-2"
-              id="riderPhone"
-              required
-            />
-            <label class="form-label">كلمة المرور</label>
-            <input
-              type="password"
-              class="form-control mb-2"
-              id="riderPassword"
-              required
-            />
-            <label class="form-label">الحالة</label>
-            <select class="form-select" id="riderStatus">
-              <option value="متاح ✅">متاح ✅</option>
-              <option value="مشغول ⏳">مشغول ⏳</option>
-              <option value="موقوف ⛔️">موقوف ⛔️</option>
-            </select>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-primary" type="submit">إضافة</button>
-          </div>
-        </form>
-      </div>
-    </div>
+<!-- ✅ سكربتات -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/env.js"></script>
+<script>
+  const token = localStorage.getItem("token");
+  if (!token) window.location.href = "login.html";
 
-    <!-- ✅ سكربتات -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../assets/js/env.js"></script>
-    <script>
-      const token = localStorage.getItem("token");
-      if (!token) window.location.href = "login.html";
+  function logout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("admin_token");
+    localStorage.removeItem("store_token");
+    localStorage.removeItem("rider_token");
+    localStorage.removeItem("admin_name");
+    localStorage.removeItem("store_name");
+    localStorage.removeItem("rider_name");
+    window.location.href = "login.html";
+  }
 
-      function logout() {
-        localStorage.removeItem("token");
-        localStorage.removeItem("admin_token");
-        localStorage.removeItem("store_token");
-        localStorage.removeItem("rider_token");
-        localStorage.removeItem("store_name");
-        localStorage.removeItem("rider_name");
-        localStorage.removeItem("admin_name");
-        window.location.href = "login.html";
-      }
+  function getBadgeColor(status) {
+    if (status === "متاح ✅") return "bg-success";
+    if (status === "مشغول ⏳") return "bg-warning text-dark";
+    if (status === "موقوف ⛔️") return "bg-secondary";
+    return "bg-light";
+  }
 
-      function getBadgeColor(status) {
-        if (status === "متاح ✅") return "bg-success";
-        if (status === "مشغول ⏳") return "bg-warning text-dark";
-        if (status === "موقوف ⛔️") return "bg-secondary";
-        return "bg-light";
-      }
+  async function loadRiders() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/riders`, {
+        headers: { Authorization: "Bearer " + token }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "فشل جلب البيانات");
+      renderRiders(data);
+    } catch (err) {
+      alert("❌ فشل تحميل المناديب: " + err.message);
+    }
+  }
 
-      async function loadRiders() {
-        try {
-          const res = await fetch(`${API_BASE_URL}/riders`, {
-            headers: { Authorization: "Bearer " + token },
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.detail || "فشل جلب البيانات");
-          renderRiders(data);
-        } catch (err) {
-          alert("❌ فشل تحميل المناديب: " + err.message);
-        }
-      }
-
-      function renderRiders(riders) {
-        const table = document.getElementById("ridersTable");
-        table.innerHTML = "";
-        riders.forEach((rider) => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
+  function renderRiders(riders) {
+    const table = document.getElementById("ridersTable");
+    table.innerHTML = "";
+    riders.forEach(rider => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
         <td>${rider.name}</td>
         <td>${rider.phone}</td>
-        <td><span class="badge ${getBadgeColor(rider.status)}">${
-            rider.status
-          }</span></td>
+        <td><span class="badge ${getBadgeColor(rider.status)}">${rider.status}</span></td>
         <td>
-          <button class="btn btn-sm btn-outline-primary me-1" onclick="changeStatus(${
-            rider.id
-          })">
-            تغيير الحالة
-          </button>
-          <button class="btn btn-sm btn-outline-danger" onclick="deleteRider(${
-            rider.id
-          })">
-            حذف
-          </button>
+          <button class="btn btn-sm btn-outline-primary me-1" onclick="changeStatus(${rider.id})">تغيير الحالة</button>
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteRider(${rider.id})">حذف</button>
         </td>
       `;
-          table.appendChild(row);
-        });
-      }
+      table.appendChild(row);
+    });
+  }
 
-      async function changeStatus(id) {
-        const status = prompt(
-          "أدخل الحالة الجديدة (متاح ✅ / مشغول ⏳ / موقوف ⛔️):"
-        );
-        if (!status) return;
-        try {
-          const res = await fetch(
-            `${API_BASE_URL}/riders/${id}/status?status=${encodeURIComponent(
-              status
-            )}`,
-            {
-              method: "PUT",
-              headers: { Authorization: "Bearer " + token },
-            }
-          );
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.detail || "فشل تغيير الحالة");
-          loadRiders();
-        } catch (err) {
-          alert("❌ فشل تحديث الحالة: " + err.message);
-        }
-      }
+  async function changeStatus(id) {
+    const status = prompt("أدخل الحالة الجديدة (متاح ✅ / مشغول ⏳ / موقوف ⛔️):");
+    if (!status) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/riders/${id}/status?status=${encodeURIComponent(status)}`, {
+        method: "PUT",
+        headers: { Authorization: "Bearer " + token }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "فشل تغيير الحالة");
+      loadRiders();
+    } catch (err) {
+      alert("❌ فشل تحديث الحالة: " + err.message);
+    }
+  }
 
-      async function deleteRider(id) {
-        if (!confirm("هل أنت متأكد من حذف المندوب؟")) return;
-        try {
-          const res = await fetch(`${API_BASE_URL}/riders/${id}`, {
-            method: "DELETE",
-            headers: { Authorization: "Bearer " + token },
-          });
-          const data = await res.json();
-          if (!res.ok) throw new Error(data.detail || "فشل حذف المندوب");
-          loadRiders();
-        } catch (err) {
-          alert("❌ فشل الحذف: " + err.message);
-        }
-      }
+  async function deleteRider(id) {
+    if (!confirm("هل أنت متأكد من حذف المندوب؟")) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/riders/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: "Bearer " + token }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "فشل حذف المندوب");
+      loadRiders();
+    } catch (err) {
+      alert("❌ فشل الحذف: " + err.message);
+    }
+  }
 
-      document
-        .getElementById("addRiderForm")
-        .addEventListener("submit", async function (e) {
-          e.preventDefault();
-          const name = document.getElementById("riderName").value;
-          const phone = document.getElementById("riderPhone").value;
-          const password = document.getElementById("riderPassword").value;
-          const status = document.getElementById("riderStatus").value;
+  document.getElementById("addRiderForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    const name = document.getElementById("riderName").value;
+    const phone = document.getElementById("riderPhone").value;
+    const password = document.getElementById("riderPassword").value;
+    const status = document.getElementById("riderStatus").value;
 
-          try {
-            const res = await fetch(`${API_BASE_URL}/riders`, {
-              method: "POST",
-              headers: {
-                Authorization: "Bearer " + token,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ name, phone, password, status }),
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.detail || "فشل الإضافة");
-            bootstrap.Modal.getInstance(
-              document.getElementById("addModal")
-            ).hide();
-            this.reset();
-            loadRiders();
-          } catch (err) {
-            alert("❌ فشل الإضافة: " + err.message);
-          }
-        });
+    try {
+      const res = await fetch(`${API_BASE_URL}/riders`, {
+        method: "POST",
+        headers: {
+          Authorization: "Bearer " + token,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, phone, password, status })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "فشل الإضافة");
+      bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
+      this.reset();
+      loadRiders();
+    } catch (err) {
+      alert("❌ فشل الإضافة: " + err.message);
+    }
+  });
 
-      window.onload = loadRiders;
-    </script>
-  </body>
+  window.onload = loadRiders;
+</script>
+</body>
 </html>
