@@ -1,258 +1,188 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>لوحة تحكم المحل</title>
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-    />
-    <style>
-      body {
-        background-color: #f8f9fa;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      }
-      .status-badge {
-        padding: 6px 12px;
-        border-radius: 12px;
-        color: #fff;
-        font-size: 0.9rem;
-      }
-      .badge-جديد {
-        background-color: #2196f3;
-      }
-      .badge-جاري {
-        background-color: #ff9800;
-      }
-      .badge-توصيل {
-        background-color: #9c27b0;
-      }
-      .badge-تم {
-        background-color: #4caf50;
-      }
-    </style>
-  </head>
-  <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-      <div class="container-fluid">
-        <a class="navbar-brand" href="#">لوحة المحل</a>
-        <button class="btn btn-outline-light" onclick="logout()">
-          تسجيل خروج
-        </button>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>لوحة تحكم المحل</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" />
+  <style>
+    body {
+      background-color: #f8f9fa;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    }
+    .status-badge {
+      padding: 6px 12px;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 0.9rem;
+    }
+    .badge-جديد { background-color: #2196f3; }
+    .badge-جاري { background-color: #ff9800; }
+    .badge-توصيل { background-color: #9c27b0; }
+    .badge-تم { background-color: #4caf50; }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">لوحة المحل</a>
+    <div>
+      <a href="settings.html" class="btn btn-outline-light me-2">
+        <i class="bi bi-gear-fill"></i> إعدادات
+      </a>
+      <a href="orders.html" class="btn btn-outline-light me-2">الرجوع</a>
+      <button class="btn btn-outline-light" onclick="logout()">تسجيل خروج</button>
+    </div>
+  </div>
+</nav>
+
+
+  <div class="container py-4">
+    <h4 class="mb-4">طلبات اليوم</h4>
+
+    <!-- فلاتر -->
+    <div class="row mb-3">
+      <div class="col-md-3">
+        <label class="form-label">من تاريخ</label>
+        <input type="date" id="fromDate" class="form-control">
       </div>
-    </nav>
-
-    <div class="container py-4">
-      <h4 class="mb-4">طلبات اليوم</h4>
-
-      <div class="row mb-4">
-        <div class="col-md-4">
-          <div class="bg-white shadow p-3 rounded text-center">
-            <h6>إجمالي الطلبات</h6>
-            <span id="totalOrders" class="fs-4 fw-bold">0</span>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="bg-white shadow p-3 rounded text-center">
-            <h6>جاري التجهيز</h6>
-            <span id="processingOrders" class="fs-4 fw-bold">0</span>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="bg-white shadow p-3 rounded text-center">
-            <h6>تم التوصيل</h6>
-            <span id="completedOrders" class="fs-4 fw-bold">0</span>
-          </div>
-        </div>
+      <div class="col-md-3">
+        <label class="form-label">إلى تاريخ</label>
+        <input type="date" id="toDate" class="form-control">
       </div>
-
-      <div class="table-responsive">
-        <table class="table table-bordered align-middle bg-white shadow">
-          <thead class="table-dark">
-            <tr>
-              <th>العميل</th>
-              <th>رقم الجوال</th>
-              <th>الطلب</th>
-              <th>الملاحظات</th>
-              <th>الموقع</th>
-              <th>المندوب</th>
-              <th>المبلغ</th>
-              <th>الحالة</th>
-              <th>الإجراء</th>
-            </tr>
-          </thead>
-          <tbody id="ordersTable"></tbody>
-        </table>
+      <div class="col-md-3">
+        <label class="form-label">حالة الطلب</label>
+        <select id="statusFilter" class="form-select">
+          <option value="">الكل</option>
+          <option value="جديد">جديد</option>
+          <option value="جاري التجهيز">جاري التجهيز</option>
+          <option value="قيد التوصيل">قيد التوصيل</option>
+          <option value="تم التوصيل">تم التوصيل</option>
+        </select>
+      </div>
+      <div class="col-md-3 d-flex align-items-end">
+        <button class="btn btn-primary w-100" onclick="applyFilters()">تطبيق الفلاتر</button>
       </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="assignModal" tabindex="-1">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">إسناد الطلب</h5>
-            <button class="btn-close" data-bs-dismiss="modal"></button>
-          </div>
-          <div class="modal-body">
-            <label class="form-label">اختر المندوب</label>
-            <select class="form-select" id="riderSelect"></select>
-            <label class="form-label mt-3">المبلغ</label>
-            <input
-              type="number"
-              class="form-control"
-              id="orderAmount"
-              required
-            />
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-primary" onclick="assignOrder()">
-              تأكيد
-            </button>
-          </div>
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="bg-white shadow p-3 rounded text-center">
+          <h6>إجمالي الطلبات</h6>
+          <span id="totalOrders" class="fs-4 fw-bold">0</span>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="bg-white shadow p-3 rounded text-center">
+          <h6>جاري التجهيز</h6>
+          <span id="processingOrders" class="fs-4 fw-bold">0</span>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="bg-white shadow p-3 rounded text-center">
+          <h6>تم التوصيل</h6>
+          <span id="completedOrders" class="fs-4 fw-bold">0</span>
         </div>
       </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="../../assets/js/env.js"></script>
-    <script>
-      const token = localStorage.getItem("store_token");
-      const headers = { Authorization: `Bearer ${token}` };
-      let currentOrderId = null;
+    <div class="d-flex justify-content-end mb-2">
+      <button class="btn btn-success" onclick="exportToExcel()">📥 تصدير إلى Excel</button>
+    </div>
 
-      function logout() {
-        localStorage.clear();
-        window.location.href = "/login.html";
-      }
+    <div class="table-responsive">
+      <table class="table table-bordered align-middle bg-white shadow" id="ordersTableFull">
+        <thead class="table-dark">
+          <tr>
+            <th>التاريخ</th>
+            <th>العميل</th>
+            <th>رقم الجوال</th>
+            <th>الطلب</th>
+            <th>الملاحظات</th>
+            <th>الموقع</th>
+            <th>المندوب</th>
+            <th>المبلغ</th>
+            <th>الحالة</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTable"></tbody>
+      </table>
+    </div>
+  </div>
 
-      async function fetchOrders() {
-        const res = await fetch(`${API_BASE_URL}/store/orders`, { headers });
-        const data = await res.json();
-        renderOrders(data);
-      }
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+  <script src="../../assets/js/env.js"></script>
+  <script>
+    const token = localStorage.getItem("store_token");
+    const headers = { Authorization: `Bearer ${token}` };
+    let allOrders = [];
 
-      async function fetchRiders() {
-        try {
-          const res = await fetch(`${API_BASE_URL}/store/available-riders`, {
-            headers,
-          });
-          const data = await res.json();
-          const select = document.getElementById("riderSelect");
+    function logout() {
+      localStorage.clear();
+      window.location.href = "/login.html";
+    }
 
-          if (data.length === 0) {
-            select.innerHTML = `<option disabled selected>لا يوجد مناديب متاحين حالياً</option>`;
-          } else {
-            select.innerHTML = data
-              .map(
-                (r) => `<option value="${r.id}">${r.name} - ${r.phone}</option>`
-              )
-              .join("");
-          }
-        } catch (err) {
-          alert("فشل في تحميل قائمة المناديب");
-        }
-      }
+    async function fetchOrders() {
+      const res = await fetch(`${API_BASE_URL}/store/orders`, { headers });
+      allOrders = await res.json();
+      renderOrders(allOrders);
+    }
 
-      function renderOrders(orders) {
-        const table = document.getElementById("ordersTable");
-        let total = 0,
-          processing = 0,
-          completed = 0;
+    function renderOrders(orders) {
+      const table = document.getElementById("ordersTable");
+      let total = 0, processing = 0, completed = 0;
+      table.innerHTML = orders.map(order => {
+        total++;
+        if (order.status.includes("تجهيز")) processing++;
+        if (order.status.includes("تم")) completed++;
+        return `
+          <tr>
+            <td>${new Date(order.created_at).toLocaleDateString()}</td>
+            <td>${order.customer_name}</td>
+            <td>${order.customer_phone}</td>
+            <td>${order.order_text}</td>
+            <td>${order.notes || "-"}</td>
+            <td><a href="https://maps.google.com/?q=${order.lat},${order.lng}" target="_blank">عرض</a></td>
+            <td>${order.rider_name || "-"}</td>
+            <td>${order.amount || "-"} ريال</td>
+            <td><span class="status-badge badge-${getStatusClass(order.status)}">${order.status}</span></td>
+          </tr>`;
+      }).join("");
+      document.getElementById("totalOrders").innerText = total;
+      document.getElementById("processingOrders").innerText = processing;
+      document.getElementById("completedOrders").innerText = completed;
+    }
 
-        table.innerHTML = orders
-          .map((order) => {
-            total++;
-            if (order.status.includes("تجهيز")) processing++;
-            if (order.status.includes("تم")) completed++;
+    function getStatusClass(status) {
+      if (status === "جديد") return "جديد";
+      if (status.includes("تجهيز")) return "جاري";
+      if (status.includes("توصيل")) return "توصيل";
+      if (status.includes("تم")) return "تم";
+      return "";
+    }
 
-            return `
-        <tr>
-          <td>${order.customer_name}</td>
-          <td>${order.customer_phone}</td>
-          <td>${order.order_text}</td>
-          <td>${order.notes || "-"}</td>
-          <td><a href="https://maps.google.com/?q=${order.lat},${
-              order.lng
-            }" target="_blank" class="btn btn-sm btn-outline-primary">عرض</a></td>
-          <td>${order.rider_name || "-"}</td>
-          <td>${order.amount || "-"} ريال</td>
-          <td><span class="status-badge badge-${getStatusClass(
-            order.status
-          )}">${order.status}</span></td>
-          <td>
-            <button class="btn btn-sm btn-warning" onclick="updateStatus(${
-              order.id
-            }, 'جاري التجهيز')">تجهيز</button>
-            <button class="btn btn-sm btn-info" onclick="openAssignModal(${
-              order.id
-            })">توصيل</button>
-            <button class="btn btn-sm btn-success" onclick="updateStatus(${
-              order.id
-            }, 'تم التوصيل')">تم</button>
-          </td>
-        </tr>`;
-          })
-          .join("");
+    function applyFilters() {
+      const from = document.getElementById("fromDate").value;
+      const to = document.getElementById("toDate").value;
+      const status = document.getElementById("statusFilter").value;
 
-        document.getElementById("totalOrders").innerText = total;
-        document.getElementById("processingOrders").innerText = processing;
-        document.getElementById("completedOrders").innerText = completed;
-      }
+      const filtered = allOrders.filter(o => {
+        const date = new Date(o.created_at).toISOString().split("T")[0];
+        return (!from || date >= from) && (!to || date <= to) &&
+               (!status || o.status === status);
+      });
 
-      function getStatusClass(status) {
-        if (status === "جديد") return "جديد";
-        if (status.includes("تجهيز")) return "جاري";
-        if (status.includes("توصيل")) return "توصيل";
-        if (status.includes("تم")) return "تم";
-        return "";
-      }
+      renderOrders(filtered);
+    }
 
-      async function updateStatus(id, status) {
-        await fetch(`${API_BASE_URL}/store/assign/${currentOrderId}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...headers,
-          },
-          body: JSON.stringify({ rider_id: riderId, amount }),
-        });
+    function exportToExcel() {
+      const table = document.getElementById("ordersTableFull");
+      const wb = XLSX.utils.table_to_book(table, { sheet: "طلبات المحل" });
+      XLSX.writeFile(wb, "طلبات_المحل.xlsx");
+    }
 
-        fetchOrders();
-      }
-
-      function openAssignModal(id) {
-        currentOrderId = id;
-        fetchRiders();
-        const modal = new bootstrap.Modal(
-          document.getElementById("assignModal")
-        );
-        modal.show();
-      }
-
-      async function assignOrder() {
-        const riderId = document.getElementById("riderSelect").value;
-        const amount = document.getElementById("orderAmount").value;
-        await fetch(`${API_BASE_URL}/orders/${currentOrderId}/assign`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...headers,
-          },
-          body: JSON.stringify({ rider_id: riderId, amount }),
-        });
-        bootstrap.Modal.getInstance(
-          document.getElementById("assignModal")
-        ).hide();
-        fetchOrders();
-      }
-
-      window.onload = fetchOrders;
-    </script>
-  </body>
+    window.onload = fetchOrders;
+  </script>
+</body>
 </html>
