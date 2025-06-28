@@ -49,7 +49,7 @@
     </div>
   </div>
 
-  <!-- نافذة إضافة مندوب -->
+  <!-- ✅ نافذة إضافة مندوب -->
   <div class="modal fade" id="addModal" tabindex="-1">
     <div class="modal-dialog">
       <form class="modal-content" id="addRiderForm">
@@ -61,7 +61,15 @@
           <label class="form-label">الاسم</label>
           <input type="text" class="form-control mb-2" id="riderName" required>
           <label class="form-label">رقم الجوال</label>
-          <input type="tel" class="form-control" id="riderPhone" required>
+          <input type="tel" class="form-control mb-2" id="riderPhone" required>
+          <label class="form-label">كلمة المرور</label>
+          <input type="password" class="form-control mb-2" id="riderPassword" required>
+          <label class="form-label">الحالة</label>
+          <select class="form-select" id="riderStatus">
+            <option value="متاح ✅">متاح ✅</option>
+            <option value="مشغول ⏳">مشغول ⏳</option>
+            <option value="موقوف ⛔️">موقوف ⛔️</option>
+          </select>
         </div>
         <div class="modal-footer">
           <button class="btn btn-primary" type="submit">إضافة</button>
@@ -91,7 +99,7 @@
 
     async function loadRiders() {
       try {
-        const res = await fetch(`${API_BASE_URL}/admin/riders`, {
+        const res = await fetch(`${API_BASE_URL}/riders`, {
           headers: { Authorization: "Bearer " + token }
         });
         const data = await res.json();
@@ -125,9 +133,11 @@
     }
 
     async function changeStatus(id) {
+      const status = prompt("أدخل الحالة الجديدة (متاح ✅ / مشغول ⏳ / موقوف ⛔️):");
+      if (!status) return;
       try {
-        const res = await fetch(`${API_BASE_URL}/admin/riders/status/${id}`, {
-          method: "POST",
+        const res = await fetch(`${API_BASE_URL}/riders/${id}/status?status=${encodeURIComponent(status)}`, {
+          method: "PUT",
           headers: { Authorization: "Bearer " + token }
         });
         const data = await res.json();
@@ -141,7 +151,7 @@
     async function deleteRider(id) {
       if (!confirm("هل أنت متأكد من حذف المندوب؟")) return;
       try {
-        const res = await fetch(`${API_BASE_URL}/admin/riders/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/riders/${id}`, {
           method: "DELETE",
           headers: { Authorization: "Bearer " + token }
         });
@@ -157,14 +167,17 @@
       e.preventDefault();
       const name = document.getElementById("riderName").value;
       const phone = document.getElementById("riderPhone").value;
+      const password = document.getElementById("riderPassword").value;
+      const status = document.getElementById("riderStatus").value;
+
       try {
-        const res = await fetch(`${API_BASE_URL}/admin/riders`, {
+        const res = await fetch(`${API_BASE_URL}/riders`, {
           method: "POST",
           headers: {
             Authorization: "Bearer " + token,
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ name, phone })
+          body: JSON.stringify({ name, phone, password, status })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail);

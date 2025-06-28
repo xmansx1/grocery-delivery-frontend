@@ -8,13 +8,10 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
   <style>
     body {
-      background-color: #f7f9fc;
+      background-color: #f8f9fa;
     }
     .table td, .table th {
       vertical-align: middle;
-    }
-    .modal-title {
-      font-weight: bold;
     }
   </style>
 </head>
@@ -30,7 +27,7 @@
   <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h4>إدارة المحلات</h4>
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+      <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
         <i class="bi bi-plus-circle me-1"></i> إضافة محل
       </button>
     </div>
@@ -46,30 +43,30 @@
           </tr>
         </thead>
         <tbody id="storesTable">
-          <!-- سيتم تعبئة المحلات هنا -->
+          <!-- المحلات هنا -->
         </tbody>
       </table>
     </div>
   </div>
 
-  <!-- نافذة الإضافة -->
+  <!-- نافذة إضافة محل -->
   <div class="modal fade" id="addModal" tabindex="-1">
     <div class="modal-dialog">
       <form class="modal-content" id="addStoreForm">
         <div class="modal-header">
-          <h5 class="modal-title">إضافة محل جديد</h5>
+          <h5 class="modal-title">إضافة محل</h5>
           <button class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <label class="form-label">اسم المحل</label>
-          <input type="text" class="form-control mb-2" id="storeName" required />
+          <label class="form-label">اسم المستخدم</label>
+          <input type="text" class="form-control mb-2" id="storeUsername" required>
           <label class="form-label">رقم الجوال</label>
-          <input type="tel" class="form-control" id="storePhone" required />
-          <label class="form-label mt-2">كلمة المرور</label>
-          <input type="password" class="form-control" id="storePassword" required />
+          <input type="tel" class="form-control mb-2" id="storePhone" required>
+          <label class="form-label">كلمة المرور</label>
+          <input type="password" class="form-control" id="storePassword" required>
         </div>
         <div class="modal-footer">
-          <button class="btn btn-primary" type="submit">إضافة</button>
+          <button class="btn btn-success" type="submit">إضافة</button>
         </div>
       </form>
     </div>
@@ -88,7 +85,7 @@
 
     async function loadStores() {
       try {
-        const res = await fetch(`${API_BASE_URL}/admin/stores`, {
+        const res = await fetch(`${API_BASE_URL}/stores`, {
           headers: { Authorization: "Bearer " + token }
         });
         const data = await res.json();
@@ -105,42 +102,48 @@
       stores.forEach(store => {
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td>${store.name}</td>
+          <td>${store.username}</td>
           <td>${store.phone}</td>
           <td>
-            <span class="badge ${store.active ? 'bg-success' : 'bg-secondary'}">
-              ${store.active ? 'نشط' : 'موقوف'}
+            <span class="badge ${store.is_active ? 'bg-success' : 'bg-secondary'}">
+              ${store.is_active ? 'مفعل' : 'موقوف'}
             </span>
           </td>
           <td>
-            <button class="btn btn-sm btn-outline-warning me-1" onclick="toggleStore(${store.id})">
-              ${store.active ? 'إيقاف' : 'تفعيل'}
+            <button class="btn btn-sm btn-outline-primary me-1" onclick="toggleStatus(${store.id}, ${store.is_active})">
+              ${store.is_active ? 'إيقاف' : 'تفعيل'}
             </button>
-            <button class="btn btn-sm btn-outline-danger" onclick="deleteStore(${store.id})">حذف</button>
+            <button class="btn btn-sm btn-outline-danger" onclick="deleteStore(${store.id})">
+              حذف
+            </button>
           </td>
         `;
         table.appendChild(row);
       });
     }
 
-    async function toggleStore(id) {
+    async function toggleStatus(id, currentStatus) {
       try {
-        const res = await fetch(`${API_BASE_URL}/admin/stores/toggle/${id}`, {
-          method: "POST",
-          headers: { Authorization: "Bearer " + token }
+        const res = await fetch(`${API_BASE_URL}/stores/${id}/status`, {
+          method: "PUT",
+          headers: {
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ is_active: !currentStatus })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail);
         loadStores();
       } catch (err) {
-        alert("❌ فشل تغيير الحالة: " + err.message);
+        alert("❌ فشل تحديث الحالة: " + err.message);
       }
     }
 
     async function deleteStore(id) {
-      if (!confirm("❗ هل أنت متأكد من حذف هذا المحل؟")) return;
+      if (!confirm("هل أنت متأكد من حذف هذا المحل؟")) return;
       try {
-        const res = await fetch(`${API_BASE_URL}/admin/stores/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/stores/${id}`, {
           method: "DELETE",
           headers: { Authorization: "Bearer " + token }
         });
@@ -154,17 +157,18 @@
 
     document.getElementById("addStoreForm").addEventListener("submit", async function (e) {
       e.preventDefault();
-      const name = document.getElementById("storeName").value;
+      const username = document.getElementById("storeUsername").value;
       const phone = document.getElementById("storePhone").value;
       const password = document.getElementById("storePassword").value;
+
       try {
-        const res = await fetch(`${API_BASE_URL}/admin/stores`, {
+        const res = await fetch(`${API_BASE_URL}/stores`, {
           method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            Authorization: "Bearer " + token
+            Authorization: "Bearer " + token,
+            "Content-Type": "application/json"
           },
-          body: JSON.stringify({ name, phone, password })
+          body: JSON.stringify({ username, phone, password })
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.detail);
@@ -178,5 +182,6 @@
 
     window.onload = loadStores;
   </script>
+
 </body>
 </html>

@@ -42,13 +42,14 @@
 
     <script src="../assets/js/env.js"></script>
     <script>
+            
       document
         .getElementById("adminLoginForm")
         .addEventListener("submit", async function (e) {
           e.preventDefault();
 
-          const errorBox = document.getElementById("error"); // تحديد عنصر الخطأ
-          errorBox.style.display = "none"; // إخفاء أي خطأ سابق
+          const errorBox = document.getElementById("error");
+          errorBox.style.display = "none";
           errorBox.textContent = "";
 
           const phone = document.getElementById("phone").value.trim();
@@ -57,8 +58,12 @@
           const payload = {
             phone,
             password,
-            user_type: "admin", // ✅ هذا السطر ضروري
+            user_type: "admin",
           };
+
+          const submitBtn = e.target.querySelector("button");
+          submitBtn.disabled = true;
+          submitBtn.textContent = "جاري التحقق...";
 
           try {
             const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -71,34 +76,20 @@
 
             const data = await response.json();
 
-            // ✅ إضافة console.logs هنا لتشخيص المشكلة
-            console.log("Response status:", response.status);
-            console.log("Response OK:", response.ok);
-            console.log("Full data from API:", data);
-            console.log("Access Token from API (data.access_token):", data.access_token);
-
-
             if (!response.ok) {
               throw new Error(data.detail || "فشل تسجيل الدخول");
             }
 
-            // ✅ تخزين التوكن وإعادة التوجيه
             localStorage.setItem("admin_token", data.access_token);
-            
-            // ✅ التحقق بعد التخزين مباشرة
-            const storedToken = localStorage.getItem("admin_token");
-            console.log("Token stored in localStorage:", storedToken);
-
-            // ✅ إضافة تأخير بسيط للاختبار (للتأكد من حفظ localStorage قبل التوجيه)
-            // هذا السطر مؤقت لأغراض التشخيص، ويمكن إزالته لاحقًا
-            await new Promise(resolve => setTimeout(resolve, 500)); // انتظر 500 مللي ثانية
-
+            await new Promise(resolve => setTimeout(resolve, 500));
             window.location.href = "dashboard.html";
           } catch (err) {
-            console.error("Error during login fetch:", err); // سجل الخطأ الكامل
-            document.getElementById("error").textContent =
-              err.message || "خطأ في الاتصال بالخادم";
-            document.getElementById("error").style.display = "block";
+            console.error("Error during login fetch:", err);
+            errorBox.textContent = err.message || "خطأ في الاتصال بالخادم";
+            errorBox.style.display = "block";
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "تسجيل الدخول";
           }
         });
     </script>
