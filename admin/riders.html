@@ -80,9 +80,11 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/env.js"></script>
 <script>
-  const myToken = localStorage.getItem("token");
+  const token = localStorage.getItem("admin_token");
+
 
   if (!token) window.location.href = "login.html";
+
 
   function logout() {
     localStorage.removeItem("token");
