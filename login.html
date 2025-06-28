@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>تسجيل الدخول</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
   <style>
     body {
       background: linear-gradient(to right, #2980b9, #6dd5fa, #ffffff);
@@ -13,20 +14,28 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      padding: 20px;
     }
 
-    .login-card {
+    .login-container {
       background-color: #fff;
-      padding: 30px;
+      padding: 40px 30px;
       border-radius: 20px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
       width: 100%;
-      max-width: 400px;
+      max-width: 450px;
     }
 
-    .login-card h3 {
+    .login-container h3 {
       margin-bottom: 25px;
       color: #333;
+      text-align: center;
+    }
+
+    .login-container img {
+      display: block;
+      margin: 0 auto 20px;
+      width: 80px;
     }
 
     .form-label {
@@ -42,16 +51,24 @@
       background-color: #0056b3;
     }
 
-    #error {
-      font-size: 0.9rem;
+    .ad-box {
+      background-color: #f8f9fa;
+      padding: 12px;
+      border: 1px dashed #aaa;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      color: #333;
+      margin-top: 20px;
+      text-align: center;
     }
   </style>
 </head>
 <body>
-  <div class="login-card">
-    <h3 class="text-center">تسجيل الدخول</h3>
-    <form id="unifiedLoginForm">
+  <div class="login-container">
+    <img src="https://cdn-icons-png.flaticon.com/512/679/679720.png" alt="شعار">
+    <h3>تسجيل الدخول</h3>
 
+    <form id="unifiedLoginForm">
       <div class="mb-3">
         <label class="form-label">نوع المستخدم</label>
         <select id="userType" class="form-select" required>
@@ -76,10 +93,16 @@
 
       <button type="submit" class="btn btn-primary w-100">تسجيل الدخول</button>
     </form>
+
+    <!-- ✅ الإعلان -->
+    <div id="loginAdBox" class="ad-box">
+      جاري تحميل إعلان...
+    </div>
   </div>
 
   <script src="assets/js/env.js"></script>
   <script>
+    // ✅ تنفيذ تسجيل الدخول
     document.getElementById("unifiedLoginForm").addEventListener("submit", async function (e) {
       e.preventDefault();
 
@@ -137,6 +160,22 @@
         document.getElementById("error").style.display = "block";
       }
     });
+
+    // ✅ تحميل إعلان عشوائي من الـ API
+    async function loadLoginAd() {
+      try {
+        const res = await fetch(`${API_BASE_URL}/ads`);
+        const ads = await res.json();
+        const activeAd = ads.length ? ads[Math.floor(Math.random() * ads.length)] : null;
+        document.getElementById("loginAdBox").innerHTML = activeAd
+          ? `<strong>${activeAd.title}</strong>: ${activeAd.content}`
+          : "لا توجد إعلانات حالياً.";
+      } catch {
+        document.getElementById("loginAdBox").innerText = "حدث خطأ أثناء تحميل الإعلان.";
+      }
+    }
+
+    loadLoginAd();
   </script>
 </body>
 </html>
