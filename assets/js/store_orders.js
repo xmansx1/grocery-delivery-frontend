@@ -1,19 +1,18 @@
 // 📁 store_orders.js - سكربت إدارة الطلبات في واجهة المتجر
 
-document.addEventListener("DOMContentLoaded", () => {
-  const token = localStorage.getItem("store_token");
-  if (!token) {
-    window.location.href = "/store/login.html";
-    return;
-  }
-
-  fetchStoreOrders(token);
-  setInterval(() => fetchStoreOrders(token), 10000);
-});
+const token = localStorage.getItem("store_token");
+if (!token) {
+  window.location.href = "/store/login.html";
+}
 
 let selectedOrderId = null;
 
-async function fetchStoreOrders(token) {
+document.addEventListener("DOMContentLoaded", () => {
+  fetchStoreOrders();
+  setInterval(fetchStoreOrders, 10000); // تحديث كل 10 ثواني
+});
+
+async function fetchStoreOrders() {
   try {
     const res = await fetch(`${API_BASE_URL}/store/orders`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -63,7 +62,6 @@ function getStatusColor(status) {
 }
 
 async function updateStatus(orderId, status) {
-  const token = localStorage.getItem("store_token");
   if (!confirm(`هل تريد تغيير الحالة إلى: ${status}؟`)) return;
   try {
     const res = await fetch(`${API_BASE_URL}/store/status/${orderId}`, {
@@ -77,23 +75,27 @@ async function updateStatus(orderId, status) {
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || "فشل تحديث الحالة");
 
+    // إرسال رسالة واتساب عند قيد التجهيز
     if (status === "قيد التجهيز" && data.whatsapp_link) {
       window.open(data.whatsapp_link, "_blank");
     }
 
-    fetchStoreOrders(token);
+    fetchStoreOrders();
   } catch (err) {
     alert(err.message);
   }
 }
 
 function viewLocation(lat, lng) {
+  if (!lat || !lng) {
+    alert("لا يوجد موقع لهذا الطلب");
+    return;
+  }
   window.open(`https://maps.google.com/?q=${lat},${lng}`, "_blank");
 }
 
 async function openAssignModal(orderId) {
   selectedOrderId = orderId;
-  const token = localStorage.getItem("store_token");
   try {
     const res = await fetch(`${API_BASE_URL}/store/available-riders`, {
       headers: { Authorization: "Bearer " + token },
@@ -103,9 +105,9 @@ async function openAssignModal(orderId) {
     if (riders.length === 0) {
       select.innerHTML = `<option disabled selected>لا يوجد مناديب متاحين حالياً</option>`;
     } else {
-      select.innerHTML = riders
-        .map((r) => `<option value="${r.id}">${r.name} - ${r.phone}</option>`)
-        .join("");
+      select.innerHTML = riders.map((r) =>
+        `<option value="${r.id}">${r.name} - ${r.phone}</option>`
+      ).join("");
     }
     new bootstrap.Modal(document.getElementById("assignModal")).show();
   } catch (err) {
@@ -113,33 +115,35 @@ async function openAssignModal(orderId) {
   }
 }
 
-function confirmAssign() {
+async function confirmAssign() {
   const riderId = document.getElementById("riderSelect").value;
   const amount = document.getElementById("amountInput").value;
-  const token = localStorage.getItem("store_token");
   if (!riderId || !amount) return alert("يرجى اختيار المندوب وإدخال المبلغ");
 
-  fetch(`${API_BASE_URL}/store/assign/${selectedOrderId}`, {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + token,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ rider_id: Number(riderId), amount: Number(amount) }),
-  })
-    .then((res) => res.json())
-    .then((data) => {
-      if (!data.rider_whatsapp || !data.customer_whatsapp)
-        return alert("لم يتم استلام روابط واتساب");
-      window.open(data.rider_whatsapp, "_blank");
-      window.open(data.customer_whatsapp, "_blank");
-      bootstrap.Modal.getInstance(document.getElementById("assignModal")).hide();
-      fetchStoreOrders(token);
-    })
-    .catch((err) => alert("فشل الإسناد: " + err.message));
+  try {
+    const res = await fetch(`${API_BASE_URL}/store/assign/${selectedOrderId}`, {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer " + token,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ rider_id: Number(riderId), amount: Number(amount) }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || "فشل إسناد الطلب");
+
+    // إرسال روابط واتساب
+    if (data.rider_whatsapp) window.open(data.rider_whatsapp, "_blank");
+    if (data.customer_whatsapp) window.open(data.customer_whatsapp, "_blank");
+
+    bootstrap.Modal.getInstance(document.getElementById("assignModal")).hide();
+    fetchStoreOrders();
+  } catch (err) {
+    alert("فشل الإسناد: " + err.message);
+  }
 }
 
 function logout() {
   localStorage.clear();
-  window.location.href = "/login.html";
+  window.location.href = "/store/login.html";
 }

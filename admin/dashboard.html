@@ -151,9 +151,7 @@
     <!-- ✅ سكربتات -->
     <script src="../assets/js/env.js"></script>
     <script>
-      const token = localStorage.getItem("token");
-
-      if (!token) {
+      if (!localStorage.getItem("token")) {
         window.location.href = "login.html";
       }
 
@@ -161,7 +159,7 @@
         try {
           const res = await fetch(`${API_BASE_URL}/dashboard/summary`, {
             headers: {
-              Authorization: "Bearer " + token,
+              Authorization: "Bearer " + localStorage.getItem("token"),
             },
           });
 
@@ -181,13 +179,7 @@
       }
 
       function logout() {
-        localStorage.removeItem("token");
-        localStorage.removeItem("admin_token");
-        localStorage.removeItem("store_token");
-        localStorage.removeItem("rider_token");
-        localStorage.removeItem("admin_name");
-        localStorage.removeItem("store_name");
-        localStorage.removeItem("rider_name");
+        localStorage.clear(); // ينظف كل شيء دفعة واحدة
         window.location.href = "login.html";
       }
 
