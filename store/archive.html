@@ -1,179 +1,195 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>أرشيف الطلبات</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
-  <style>
-    body {
-      background-color: #f1f3f5;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-    .navbar {
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    .filter-bar {
-      gap: 1rem;
-      flex-wrap: wrap;
-    }
-    .table thead {
-      background-color: #343a40;
-      color: #fff;
-    }
-  </style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>أرشيف الطلبات</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
+    />
+    <style>
+      body {
+        background-color: #f1f3f5;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      }
+      .navbar {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      }
+      .filter-bar {
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+      .table thead {
+        background-color: #343a40;
+        color: #fff;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="dashboard.html">لوحة تحكم المحل</a>
+        <button class="btn btn-outline-light" onclick="logout()">
+          تسجيل خروج
+        </button>
+      </div>
+    </nav>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark px-4">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="dashboard.html">لوحة تحكم المحل</a>
-    <button class="btn btn-outline-light" onclick="logout()">تسجيل خروج</button>
-  </div>
-</nav>
+    <div class="container py-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="mb-0">📁 أرشيف الطلبات</h4>
+      </div>
 
-<div class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">📁 أرشيف الطلبات</h4>
-  </div>
+      <div class="d-flex align-items-end mb-4 filter-bar">
+        <div>
+          <label class="form-label">الحالة</label>
+          <select class="form-select" id="statusFilter">
+            <option value="">الكل</option>
+            <option value="تم التوصيل">تم التوصيل</option>
+            <option value="تم الإلغاء">تم الإلغاء</option>
+          </select>
+        </div>
+        <div>
+          <label class="form-label">من تاريخ</label>
+          <input type="date" class="form-control" id="fromDate" />
+        </div>
+        <div>
+          <label class="form-label">إلى تاريخ</label>
+          <input type="date" class="form-control" id="toDate" />
+        </div>
+        <div class="ms-auto">
+          <button class="btn btn-primary" onclick="filterOrders()">
+            تطبيق الفلاتر
+          </button>
+          <button class="btn btn-success ms-2" onclick="exportToExcel()">
+            <i class="bi bi-file-earmark-excel"></i> تصدير Excel
+          </button>
+        </div>
+      </div>
 
-  <div class="d-flex align-items-end mb-4 filter-bar">
-    <div>
-      <label class="form-label">الحالة</label>
-      <select class="form-select" id="statusFilter">
-        <option value="">الكل</option>
-        <option value="تم التوصيل">تم التوصيل</option>
-        <option value="تم الإلغاء">تم الإلغاء</option>
-      </select>
+      <div class="table-responsive shadow-sm rounded bg-white p-2">
+        <table class="table table-bordered align-middle mb-0">
+          <thead>
+            <tr>
+              <th>التاريخ</th>
+              <th>العميل</th>
+              <th>رقم الجوال</th>
+              <th>الطلب</th>
+              <th>الملاحظات</th>
+              <th>المبلغ</th>
+              <th>الحالة</th>
+            </tr>
+          </thead>
+          <tbody id="ordersTable"></tbody>
+        </table>
+      </div>
     </div>
-    <div>
-      <label class="form-label">من تاريخ</label>
-      <input type="date" class="form-control" id="fromDate">
-    </div>
-    <div>
-      <label class="form-label">إلى تاريخ</label>
-      <input type="date" class="form-control" id="toDate">
-    </div>
-    <div class="ms-auto">
-      <button class="btn btn-primary" onclick="filterOrders()">تطبيق الفلاتر</button>
-      <button class="btn btn-success ms-2" onclick="exportToExcel()">
-        <i class="bi bi-file-earmark-excel"></i> تصدير Excel
-      </button>
-    </div>
-  </div>
 
-  <div class="table-responsive shadow-sm rounded bg-white p-2">
-    <table class="table table-bordered align-middle mb-0">
-      <thead>
-        <tr>
-          <th>التاريخ</th>
-          <th>العميل</th>
-          <th>رقم الجوال</th>
-          <th>الطلب</th>
-          <th>الملاحظات</th>
-          <th>المبلغ</th>
-          <th>الحالة</th>
-        </tr>
-      </thead>
-      <tbody id="ordersTable"></tbody>
-    </table>
-  </div>
-</div>
+    <script src="/assets/js/env.js"></script>
+    <script>
+      const token = localStorage.getItem("store_token");
+      if (!token) window.location.href = "login.html";
 
-<script src="/assets/js/env.js"></script>
-<script>
-  const token = localStorage.getItem("store_token");
-  if (!token) window.location.href = "login.html";
+      let allOrders = [];
 
-  let allOrders = [];
+      async function fetchOrders() {
+        try {
+          const res = await fetch(`${API_BASE_URL}/store/orders`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
 
-  async function fetchOrders() {
-    try {
-      const res = await fetch(`${API_BASE_URL}/orders`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+          if (!res.ok) throw new Error("فشل في جلب البيانات");
 
-      if (!res.ok) throw new Error("فشل في جلب البيانات");
+          const data = await res.json();
+          allOrders = data.filter(
+            (order) =>
+              order.status === "تم التوصيل" || order.status === "تم الإلغاء"
+          );
 
-      const data = await res.json();
-      allOrders = data.filter(order =>
-        order.status === "تم التوصيل" || order.status === "تم الإلغاء"
-      );
+          renderOrders(allOrders);
+        } catch (err) {
+          alert("❌ حدث خطأ أثناء تحميل الطلبات");
+        }
+      }
 
-      renderOrders(allOrders);
-    } catch (err) {
-      alert("❌ حدث خطأ أثناء تحميل الطلبات");
-    }
-  }
+      function renderOrders(data = allOrders) {
+        const table = document.getElementById("ordersTable");
+        table.innerHTML = "";
 
-  function renderOrders(data = allOrders) {
-    const table = document.getElementById("ordersTable");
-    table.innerHTML = "";
-
-    data.forEach(order => {
-      const date = new Date(order.created_at).toLocaleDateString("ar-EG");
-      const row = document.createElement("tr");
-      row.innerHTML = `
+        data.forEach((order) => {
+          const date = new Date(order.created_at).toLocaleDateString("ar-EG");
+          const row = document.createElement("tr");
+          row.innerHTML = `
         <td>${date}</td>
         <td>${order.customer_name}</td>
         <td>${order.customer_phone}</td>
         <td>${order.order_text}</td>
         <td>${order.notes || "-"}</td>
         <td>${order.total_amount || 0} ريال</td>
-        <td><span class="badge ${order.status === 'تم التوصيل' ? 'bg-success' : 'bg-danger'}">${order.status}</span></td>
+        <td><span class="badge ${
+          order.status === "تم التوصيل" ? "bg-success" : "bg-danger"
+        }">${order.status}</span></td>
       `;
-      table.appendChild(row);
-    });
-  }
+          table.appendChild(row);
+        });
+      }
 
-  function filterOrders() {
-    const status = document.getElementById("statusFilter").value;
-    const from = document.getElementById("fromDate").value;
-    const to = document.getElementById("toDate").value;
+      function filterOrders() {
+        const status = document.getElementById("statusFilter").value;
+        const from = document.getElementById("fromDate").value;
+        const to = document.getElementById("toDate").value;
 
-    const filtered = allOrders.filter(order => {
-      const orderDate = new Date(order.created_at).toISOString().split("T")[0];
-      const dateValid = (!from || orderDate >= from) && (!to || orderDate <= to);
-      const statusValid = !status || order.status === status;
-      return dateValid && statusValid;
-    });
+        const filtered = allOrders.filter((order) => {
+          const orderDate = new Date(order.created_at)
+            .toISOString()
+            .split("T")[0];
+          const dateValid =
+            (!from || orderDate >= from) && (!to || orderDate <= to);
+          const statusValid = !status || order.status === status;
+          return dateValid && statusValid;
+        });
 
-    renderOrders(filtered);
-  }
+        renderOrders(filtered);
+      }
 
-  function exportToExcel() {
-    const data = allOrders.map(order => [
-      new Date(order.created_at).toLocaleDateString("ar-EG"),
-      order.customer_name,
-      order.customer_phone,
-      order.order_text,
-      order.notes || "-",
-      order.total_amount || 0,
-      order.status
-    ]);
+      function exportToExcel() {
+        const data = allOrders.map((order) => [
+          new Date(order.created_at).toLocaleDateString("ar-EG"),
+          order.customer_name,
+          order.customer_phone,
+          order.order_text,
+          order.notes || "-",
+          order.total_amount || 0,
+          order.status,
+        ]);
 
-    let csv = "التاريخ,العميل,رقم الجوال,الطلب,الملاحظات,المبلغ,الحالة\n";
-    data.forEach(row => {
-      csv += row.join(",") + "\n";
-    });
+        let csv = "التاريخ,العميل,رقم الجوال,الطلب,الملاحظات,المبلغ,الحالة\n";
+        data.forEach((row) => {
+          csv += row.join(",") + "\n";
+        });
 
-    const encodedUri = encodeURI("data:text/csv;charset=utf-8,\uFEFF" + csv);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "orders_archive.csv");
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
+        const encodedUri = encodeURI(
+          "data:text/csv;charset=utf-8,\uFEFF" + csv
+        );
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", "orders_archive.csv");
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
 
-  function logout() {
-    localStorage.removeItem("store_token");
-    window.location.href = "login.html";
-  }
+      function logout() {
+        localStorage.removeItem("store_token");
+        window.location.href = "login.html";
+      }
 
-  window.onload = fetchOrders;
-</script>
-
-</body>
+      window.onload = fetchOrders;
+    </script>
+  </body>
 </html>
