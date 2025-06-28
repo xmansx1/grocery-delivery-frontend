@@ -4,118 +4,151 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>مرحباً بكم في حي تنال - نظام التوصيل الذكي</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/679/679720.png" type="image/png">
 
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
 
     <style>
         :root {
-            --primary-color: #007bff; /* أزرق بوتستراب */
-            --secondary-color: #6c757d; /* رمادي بوتستراب */
-            --success-color: #28a745; /* أخضر بوتستراب */
-            --info-color: #17a2b8; /* أزرق فاتح بوتستراب */
-            --light-bg: #f8f9fa; /* خلفية فاتحة جداً */
+            --primary-color: #4361ee; /* أزرق عصري */
+            --secondary-color: #7209b7; /* بنفسجي */
+            --success-color: #4cc9f0; /* أزرق سماوي */
+            --info-color: #4895ef; /* أزرق فاتح */
+            --light-bg: #f8f9fa;
             --white: #ffffff;
-            --text-dark: #343a40; /* نص داكن */
-            --text-light: #6c757d; /* نص فاتح */
+            --text-dark: #2b2d42;
+            --text-light: #8d99ae;
             --border-color: #e9ecef;
             --shadow-light: rgba(0, 0, 0, 0.05);
             --shadow-medium: rgba(0, 0, 0, 0.1);
+            --gradient-primary: linear-gradient(135deg, #4361ee, #3a0ca3);
         }
 
         body {
-            background: linear-gradient(135deg, #e0f2f7, #c1e7f3); /* تدرج أزرق فاتح جميل */
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
             min-height: 100vh;
-            font-family: 'Cairo', 'Poppins', sans-serif;
+            font-family: 'Tajawal', sans-serif;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 30px; /* زيادة التبطين قليلاً */
+            padding: 20px;
             color: var(--text-dark);
-            overflow-x: hidden; /* منع التمرير الأفقي */
+            overflow-x: hidden;
         }
 
         .main-container {
-            max-width: 1100px; /* زيادة العرض قليلاً */
+            max-width: 1200px;
             width: 100%;
             background-color: var(--white);
-            padding: 50px; /* زيادة التبطين الداخلي */
-            border-radius: 25px; /* زوايا أكثر دائرية */
-            box-shadow: 0 20px 50px var(--shadow-medium); /* ظل أعمق وأكثر انتشاراً */
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-wrap: wrap;
-            gap: 40px; /* زيادة المسافة بين الأقسام */
-            justify-content: center; /* توسيط العناصر عندما لا تشغل المساحة كاملة */
-            border: 1px solid var(--border-color); /* حدود ناعمة */
+            gap: 40px;
+            justify-content: center;
+            border: none;
+            overflow: hidden;
+            position: relative;
         }
 
-        /* 🟢 قسم الترحيب */
+        .main-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 10px;
+            background: var(--gradient-primary);
+        }
+
+        /* قسم الترحيب */
         .welcome-section {
-            flex: 1 1 450px; /* السماح بالتمدد حتى 450px كحد أدنى */
+            flex: 1 1 500px;
             text-align: center;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
         }
 
         .welcome-section .app-icon {
-            width: 120px; /* حجم أيقونة أكبر قليلاً */
-            height: 120px;
-            margin-bottom: 25px;
-            border-radius: 50%; /* لجعلها دائرة مثالية إذا كانت الصورة مربعة */
-            background-color: var(--primary-color);
+            width: 140px;
+            height: 140px;
+            margin-bottom: 30px;
+            border-radius: 30px;
+            background: var(--gradient-primary);
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3); /* ظل خاص للأيقونة */
+            box-shadow: 0 15px 30px rgba(67, 97, 238, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .welcome-section .app-icon:hover {
+            transform: scale(1.05) rotate(5deg);
         }
 
         .welcome-section .app-icon img {
-            width: 70%; /* حجم الأيقونة داخل الدائرة */
-            height: 70%;
+            width: 60%;
+            height: 60%;
             object-fit: contain;
+            filter: brightness(0) invert(1);
         }
 
         .welcome-section h1 {
-            font-size: 2.8rem; /* حجم أكبر للعنوان */
-            margin-bottom: 15px;
-            color: var(--primary-color);
-            font-weight: 700;
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            background: linear-gradient(to right, #4361ee, #7209b7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-weight: 900;
+            line-height: 1.2;
         }
 
         .welcome-section p {
-            font-size: 1.25rem; /* نص أكبر وأوضح */
+            font-size: 1.25rem;
             color: var(--text-light);
-            margin-bottom: 35px; /* مسافة أكبر قبل الأزرار */
-            line-height: 1.6;
-            max-width: 500px; /* للتحكم في طول السطر */
+            margin-bottom: 40px;
+            line-height: 1.7;
+            max-width: 500px;
+        }
+
+        .buttons-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
         }
 
         .welcome-section .btn {
             font-size: 1.1rem;
-            padding: 14px 35px; /* تكبير حجم الأزرار */
-            margin: 10px; /* زيادة المسافة بين الأزرار */
-            border-radius: 30px; /* أزرار دائرية أكثر */
-            font-weight: 600;
-            transition: all 0.3s ease; /* تأثيرات انتقالية ناعمة */
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); /* ظل للأزرار */
+            padding: 15px 35px;
+            border-radius: 50px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .welcome-section .btn-success {
             background-color: var(--success-color);
-            border-color: var(--success-color);
-            color: var(--white);
+            color: var(--text-dark);
         }
 
         .welcome-section .btn-success:hover {
-            background-color: #218838;
-            border-color: #1e7e34;
+            background-color: #3aa8d8;
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+            box-shadow: 0 10px 25px rgba(76, 201, 240, 0.4);
         }
 
         .welcome-section .btn-outline-primary {
@@ -128,97 +161,174 @@
             background-color: var(--primary-color);
             color: var(--white);
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 123, 255, 0.3);
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
         }
 
-        /* 🟡 قسم الإعلانات */
+        /* قسم الإعلانات */
         .ads-section {
-            flex: 1 1 450px;
-            background-color: var(--light-bg); /* خلفية أفتح قليلاً للإعلانات */
-            padding: 30px; /* زيادة التبطين */
-            border-radius: 20px; /* زوايا دائرية */
-            border: 1px solid var(--border-color);
-            box-shadow: 0 8px 25px var(--shadow-light); /* ظل أنعم */
+            flex: 1 1 500px;
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            box-shadow: 0 10px 30px rgba(67, 97, 238, 0.05);
             display: flex;
             flex-direction: column;
-            gap: 20px; /* مسافة أكبر بين الإعلانات */
+            gap: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ads-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 5px;
+            height: 100%;
+            background: var(--gradient-primary);
         }
 
         .ads-section h4 {
-            margin-bottom: 25px; /* مسافة أكبر بعد العنوان */
+            margin-bottom: 25px;
             color: var(--primary-color);
             font-weight: 700;
-            font-size: 1.8rem; /* حجم عنوان أكبر */
+            font-size: 1.8rem;
             text-align: center;
+            position: relative;
+            padding-bottom: 15px;
+        }
+
+        .ads-section h4::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 50%;
+            transform: translateX(50%);
+            width: 80px;
+            height: 3px;
+            background: var(--gradient-primary);
+            border-radius: 3px;
         }
 
         .ads-section h4 i {
-            margin-inline-end: 10px; /* مسافة بعد الأيقونة */
-            color: var(--info-color);
+            margin-inline-end: 10px;
+            color: var(--secondary-color);
         }
 
         .ad-box {
             background-color: var(--white);
-            border: 1px solid var(--border-color);
-            padding: 20px; /* تبطين أكبر */
-            border-radius: 15px; /* زوايا أكثر دائرية */
-            box-shadow: 0 5px 15px var(--shadow-light); /* ظل ناعم */
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid rgba(67, 97, 238, 0.1);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ad-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 3px;
+            height: 0;
+            background: var(--gradient-primary);
+            transition: height 0.3s ease;
         }
 
         .ad-box:hover {
-            transform: translateY(-5px); /* رفع بسيط عند المرور بالفأرة */
-            box-shadow: 0 10px 25px var(--shadow-medium); /* ظل أكبر عند المرور */
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.1);
+            border-color: rgba(67, 97, 238, 0.2);
+        }
+
+        .ad-box:hover::before {
+            height: 100%;
         }
 
         .ad-box p {
             margin: 0;
             color: var(--text-dark);
-            font-size: 1.1rem; /* حجم نص أكبر */
-            line-height: 1.5;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            position: relative;
         }
 
         .ad-box p strong {
             color: var(--primary-color);
+            font-weight: 700;
         }
 
-        /* responsive adjustments */
+        /* تأثيرات للعناصر */
+        .animate-pop {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        .ad-box:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .ad-box:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .ad-box:nth-child(4) {
+            animation-delay: 0.6s;
+        }
+
+        /* تعديلات للشاشات الصغيرة */
+        @media (max-width: 992px) {
+            .main-container {
+                padding: 30px;
+            }
+            
+            .welcome-section h1 {
+                font-size: 2.4rem;
+            }
+            
+            .welcome-section p {
+                font-size: 1.1rem;
+            }
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 15px;
             }
+            
             .main-container {
-                padding: 30px;
+                padding: 25px;
                 border-radius: 20px;
-                flex-direction: column; /* الأقسام فوق بعضها البعض */
+                flex-direction: column;
                 gap: 30px;
             }
+            
             .welcome-section {
-                padding: 15px;
+                padding: 15px 0;
             }
+            
             .welcome-section h1 {
                 font-size: 2.2rem;
             }
+            
             .welcome-section p {
                 font-size: 1.1rem;
+                margin-bottom: 30px;
             }
+            
             .welcome-section .btn {
                 font-size: 1rem;
                 padding: 12px 25px;
             }
+            
             .ads-section {
                 padding: 25px;
-                border-radius: 15px;
             }
+            
             .ads-section h4 {
-                font-size: 1.5rem;
-            }
-            .ad-box {
-                padding: 15px;
-                border-radius: 10px;
-            }
-            .ad-box p {
-                font-size: 1rem;
+                font-size: 1.6rem;
             }
         }
 
@@ -226,53 +336,62 @@
             .main-container {
                 padding: 20px;
             }
+            
             .welcome-section h1 {
                 font-size: 2rem;
             }
-            .welcome-section p {
-                font-size: 1rem;
+            
+            .welcome-section .app-icon {
+                width: 110px;
+                height: 110px;
             }
+            
+            .buttons-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            
             .welcome-section .btn {
-                margin: 5px; /* تقليل المسافة بين الأزرار في الشاشات الصغيرة جداً */
-                padding: 10px 20px;
+                width: 100%;
+                justify-content: center;
             }
-            .app-icon {
-                width: 100px;
-                height: 100px;
+            
+            .ad-box p {
+                font-size: 1rem;
             }
         }
     </style>
 </head>
 <body>
-    <div class="main-container">
+    <div class="main-container animate__animated animate__fadeIn">
         <div class="welcome-section">
-            <div class="app-icon">
+            <div class="app-icon animate__animated animate__bounceIn">
                 <img src="https://cdn-icons-png.flaticon.com/512/679/679720.png" alt="شعار تطبيق التوصيل">
             </div>
-            <h1>مرحباً بكم في حي تنال</h1>
-            <p>خدمة التوصيل الذكي لأهالي الحي! اطلب من أقرب محل واحصل على توصيل سريع وموثوق في دقائق.</p>
+            <h1 class="animate__animated animate__fadeInUp">مرحباً بكم في حي تنال</h1>
+            <p class="animate__animated animate__fadeInUp animate__delay-1s">خدمة التوصيل الذكي لأهالي الحي! اطلب من أقرب محل واحصل على توصيل سريع وموثوق في دقائق.</p>
             <div class="buttons-group">
-                <a href="order.html" class="btn btn-success">
+                <a href="order.html" class="btn btn-success animate__animated animate__fadeInUp animate__delay-2s">
                     <i class="bi bi-cart4"></i> اطلب الآن
                 </a>
-                <button onclick="goToDashboard()" class="btn btn-outline-primary">
+                <button onclick="goToDashboard()" class="btn btn-outline-primary animate__animated animate__fadeInUp animate__delay-2s">
                     <i class="bi bi-person-lock"></i> تسجيل الدخول
                 </button>
             </div>
         </div>
 
         <div class="ads-section">
-            <h4><i class="bi bi-megaphone-fill"></i> إعلانات وعروض</h4>
+            <h4 class="animate__animated animate__fadeIn"><i class="bi bi-megaphone-fill"></i> إعلانات وعروض</h4>
 
-            <div class="ad-box">
+            <div class="ad-box animate__animated animate-pop">
                 <p><strong>مطعم الزاد:</strong> خصم 20% على جميع الوجبات العائلية هذا الأسبوع! لا تفوت الفرصة.</p>
             </div>
 
-            <div class="ad-box">
+            <div class="ad-box animate__animated animate-pop">
                 <p><strong>مغسلة السريع:</strong> خدمة استلام وتسليم مجانية لملابسك عند طلب الغسيل من التطبيق. جودة وسرعة!</p>
             </div>
 
-            <div class="ad-box">
+            <div class="ad-box animate__animated animate-pop">
                 <p><strong>مخبز الأصيل:</strong> خصم 10% على المخبوزات الطازجة عند الشراء لأول مرة عبر التطبيق.</p>
             </div>
         </div>
@@ -283,7 +402,7 @@
     <script>
         function goToDashboard() {
             // التحقق من التوكنات المخزنة في localStorage
-            const adminToken = localStorage.getItem("admin_token"); // الاسم المعدل
+            const adminToken = localStorage.getItem("admin_token");
             const storeToken = localStorage.getItem("store_token");
             const riderToken = localStorage.getItem("rider_token");
 
@@ -291,15 +410,21 @@
             if (adminToken) {
                 window.location.href = "admin/dashboard.html";
             } else if (storeToken) {
-                // قد تحتاج لتغيير هذا المسار إلى "store/dashboard.html" أو ما يناسبك
                 window.location.href = "store/order.html";
             } else if (riderToken) {
                 window.location.href = "rider/orders.html";
             } else {
-                // إذا لم يتم العثور على توكن، قم بإعادة التوجيه إلى صفحة تسجيل الدخول
                 window.location.href = "login.html";
             }
         }
+
+        // إضافة تأثيرات عند التحميل
+        document.addEventListener('DOMContentLoaded', function() {
+            const elements = document.querySelectorAll('.animate-pop');
+            elements.forEach((el, index) => {
+                el.style.animationDelay = `${index * 0.2}s`;
+            });
+        });
     </script>
 </body>
 </html>
