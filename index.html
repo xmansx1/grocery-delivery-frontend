@@ -1,90 +1,140 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>مرحباً بكم في حي تنال</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-      rel="stylesheet"
-    />
-    <style>
-      body {
-        background: linear-gradient(to right, #f8f9fa, #e9ecef);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      }
-      .welcome-box {
-        background-color: #fff;
-        padding: 40px;
-        border-radius: 16px;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        max-width: 500px;
-        width: 100%;
-      }
-      .welcome-box h1 {
-        font-size: 2rem;
-        margin-bottom: 20px;
-      }
-      .welcome-box p {
-        font-size: 1.1rem;
-        color: #666;
-      }
-      .btn-custom {
-        font-size: 1.1rem;
-        padding: 10px 25px;
-        margin: 10px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="welcome-box">
-      <img
-        src="https://cdn-icons-png.flaticon.com/512/679/679720.png"
-        alt="logo"
-        width="80"
-        class="mb-3"
-      />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>مرحباً بكم في حي تنال</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+  <style>
+    body {
+      background: linear-gradient(to left, #f8f9fa, #dfe4ea);
+      min-height: 100vh;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .main-container {
+      max-width: 1000px;
+      width: 100%;
+      background-color: #ffffff;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 30px;
+      justify-content: space-between;
+    }
+
+    .welcome-section {
+      flex: 1 1 400px;
+      text-align: center;
+    }
+
+    .welcome-section img {
+      width: 100px;
+      margin-bottom: 20px;
+    }
+
+    .welcome-section h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      color: #333;
+    }
+
+    .welcome-section p {
+      font-size: 1.1rem;
+      color: #555;
+      margin-bottom: 20px;
+    }
+
+    .welcome-section .btn {
+      font-size: 1.1rem;
+      padding: 10px 25px;
+      margin: 8px;
+    }
+
+    .ads-section {
+      flex: 1 1 400px;
+      background-color: #f8f9fa;
+      padding: 20px;
+      border-radius: 15px;
+      border: 1px solid #dee2e6;
+    }
+
+    .ads-section h4 {
+      margin-bottom: 20px;
+      color: #0d6efd;
+    }
+
+    .ad-box {
+      background-color: #fff;
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+    }
+
+    .ad-box p {
+      margin: 0;
+      color: #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <!-- 🟢 قسم الترحيب -->
+    <div class="welcome-section">
+      <img src="https://cdn-icons-png.flaticon.com/512/679/679720.png" alt="logo">
       <h1>مرحباً بكم في حي تنال</h1>
       <p>خدمة التوصيل الذكي لأهالي الحي - اطلب من أقرب محل في دقائق!</p>
-
-      <div class="d-grid gap-2 mt-4">
-        <a href="order.html" class="btn btn-success btn-custom">
-          <i class="bi bi-cart4"></i> اطلب الآن
-        </a>
-        <button
-          onclick="window.location.href='login.html'"
-          class="btn btn-outline-primary"
-        >
-          <i class="bi bi-person-lock"></i> تسجيل الدخول
-        </button>
-      </div>
+      <a href="order.html" class="btn btn-success">
+        <i class="bi bi-cart4"></i> اطلب الآن
+      </a>
+      <button onclick="goToDashboard()" class="btn btn-outline-primary">
+        <i class="bi bi-person-lock"></i> تسجيل الدخول
+      </button>
     </div>
 
-    <script>
-      function goToDashboard() {
-        const adminToken = localStorage.getItem("admin_token");
-        const storeToken = localStorage.getItem("store_token");
-        const riderToken = localStorage.getItem("rider_token");
+    <!-- 🟡 قسم الإعلانات -->
+    <div class="ads-section">
+      <h4><i class="bi bi-megaphone"></i> إعلانات تجارية</h4>
 
-        if (adminToken) {
-          window.location.href = "admin/dashboard.html";
-        } else if (storeToken) {
-          window.location.href = "store/dashboard.html";
-        } else if (riderToken) {
-          window.location.href = "rider/orders.html";
-        } else {
-          window.location.href = "login.html";
-        }
+      <!-- ✅ إعلان 1 -->
+      <div class="ad-box">
+        <p><strong>مطعم الزاد:</strong> خصم 20% على الوجبات العائلية هذا الأسبوع!</p>
+      </div>
+
+      <!-- ✅ إعلان 2 -->
+      <div class="ad-box">
+        <p><strong>مغسلة السريع:</strong> خدمة استلام وتسليم مجانية عند طلب الغسيل من التطبيق.</p>
+      </div>
+
+      <!-- 🔄 هذه الإعلانات يمكن تحميلها لاحقًا من API -->
+    </div>
+  </div>
+
+  <script>
+    function goToDashboard() {
+      const adminToken = localStorage.getItem("admin_token");
+      const storeToken = localStorage.getItem("store_token");
+      const riderToken = localStorage.getItem("rider_token");
+
+      if (adminToken) {
+        window.location.href = "admin/dashboard.html";
+      } else if (storeToken) {
+        window.location.href = "store/dashboard.html";
+      } else if (riderToken) {
+        window.location.href = "rider/orders.html";
+      } else {
+        window.location.href = "login.html";
       }
-    </script>
-  </body>
+    }
+  </script>
+</body>
 </html>
