@@ -109,8 +109,8 @@ function renderOrders(orders) {
         </div>
         <p>📞 ${order.customer_phone}</p>
         <p>📦 ${order.order_text}</p>
-        <p>💵 المبلغ: ${order.amount || '-'} ريال</p>
-        <p>⏱ منذ: ${timeDisplay}</p>
+        
+ 
         ${order.rider_name ? `<p>🚴‍♂️ المندوب: ${order.rider_name}</p>` : ""}
         <div class="d-flex gap-2 flex-wrap mt-2">
           <button class="btn btn-sm btn-outline-primary" onclick="viewLocation(${order.lat}, ${order.lng})">عرض الموقع</button>
