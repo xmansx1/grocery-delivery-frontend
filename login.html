@@ -1,152 +1,313 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>تسجيل الدخول</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
-  <style>
-    body {
-      background: linear-gradient(to right, #2980b9, #6dd5fa, #ffffff);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .login-container {
-      background-color: #fff;
-      padding: 40px 30px;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 450px;
-    }
-    .login-container h3 {
-      margin-bottom: 25px;
-      color: #333;
-      text-align: center;
-    }
-    .login-container img {
-      display: block;
-      margin: 0 auto 20px;
-      width: 80px;
-    }
-    .form-label {
-      font-weight: bold;
-    }
-    .btn-primary {
-      background-color: #007bff;
-      border: none;
-    }
-    .btn-primary:hover {
-      background-color: #0056b3;
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>تسجيل الدخول - نظام التوصيل</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --primary-hover-color: #0056b3;
+            --gradient-start: #2980b9; /* Dark Blue */
+            --gradient-middle: #6dd5fa; /* Light Blue */
+            --gradient-end: #ffffff; /* White */
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --shadow-light: rgba(0, 0, 0, 0.1);
+            --shadow-medium: rgba(0, 0, 0, 0.2);
+        }
+
+        body {
+            background: linear-gradient(to right, var(--gradient-start), var(--gradient-middle), var(--gradient-end));
+            font-family: 'Cairo', 'Poppins', sans-serif; /* Prioritize Cairo for Arabic, Poppins for others */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative; /* For the overlay */
+            overflow: hidden; /* Prevent scrollbar if overlay slightly larger */
+        }
+
+        /* Background Overlay for depth */
+        .background-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1); /* Subtle white overlay */
+            z-index: 1; /* Below the login card */
+        }
+
+        .login-container {
+            background-color: var(--card-bg);
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px var(--shadow-medium); /* Deeper shadow for professional look */
+            width: 100%;
+            max-width: 450px;
+            position: relative; /* To be above the overlay */
+            z-index: 2;
+            transition: transform 0.3s ease-in-out; /* Subtle hover effect */
+        }
+
+        /* Optional: Subtle hover effect on the card */
+        .login-container:hover {
+            transform: translateY(-5px);
+        }
+
+        .app-logo-text {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .login-container h3 {
+            margin-bottom: 25px;
+            color: var(--text-color);
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .form-label {
+            font-weight: 600; /* Slightly bolder */
+            color: var(--text-color);
+            margin-bottom: 8px; /* More spacing */
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 10px; /* More rounded corners */
+            padding: 12px 15px; /* More padding for better touch targets */
+            border: 1px solid #ddd;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25); /* Bootstrap's primary focus color */
+            outline: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            border-radius: 10px; /* More rounded */
+            padding: 12px 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth transitions */
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover-color);
+            transform: translateY(-2px); /* Subtle lift on hover */
+        }
+
+        .btn-primary:active {
+            transform: translateY(0); /* Return to original position on click */
+        }
+
+        .alert-danger {
+            border-radius: 8px;
+            font-size: 0.95rem;
+            padding: 10px 15px;
+            line-height: 1.4;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 576px) {
+            .login-container {
+                padding: 30px 20px;
+                border-radius: 15px;
+            }
+            .app-logo-text {
+                font-size: 1.8rem;
+            }
+            .login-container h3 {
+                font-size: 1.5rem;
+            }
+            .form-control,
+            .form-select {
+                padding: 10px 12px;
+            }
+            .btn-primary {
+                padding: 10px 20px;
+                font-size: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-  <div class="login-container">
-    <img src="https://cdn-icons-png.flaticon.com/512/679/679720.png" alt="شعار">
-    <h3>تسجيل الدخول</h3>
+    <div class="background-overlay"></div>
+    <div class="login-container">
+        <div class="app-logo-text">منصة التوصيل</div>
+        <h3>تسجيل الدخول</h3>
 
-    <form id="unifiedLoginForm">
-      <div class="mb-3">
-        <label class="form-label">نوع المستخدم</label>
-        <select id="userType" class="form-select" required>
-          <option value="" selected disabled>اختر نوع المستخدم</option>
-          <option value="admin">مشرف</option>
-          <option value="store">صاحب محل</option>
-          <option value="rider">مندوب</option>
-        </select>
-      </div>
+        <form id="unifiedLoginForm">
+            <div class="mb-3">
+                <label for="userType" class="form-label">نوع المستخدم</label>
+                <select id="userType" class="form-select" required>
+                    <option value="" selected disabled>اختر نوع المستخدم</option>
+                    <option value="admin">مشرف</option>
+                    <option value="store">صاحب محل</option>
+                    <option value="rider">مندوب</option>
+                </select>
+            </div>
 
-      <div class="mb-3">
-        <label class="form-label">رقم الجوال</label>
-        <input type="tel" class="form-control" id="phone" required />
-      </div>
+            <div class="mb-3">
+                <label for="phone" class="form-label">رقم الجوال</label>
+                <input type="tel" class="form-control" id="phone" required placeholder="أدخل رقم الجوال">
+            </div>
 
-      <div class="mb-3">
-        <label class="form-label">كلمة المرور</label>
-        <input type="password" class="form-control" id="password" required />
-      </div>
+            <div class="mb-4"> <label for="password" class="form-label">كلمة المرور</label>
+                <input type="password" class="form-control" id="password" required placeholder="أدخل كلمة المرور">
+            </div>
 
-      <div id="error" class="text-danger mb-3" style="display: none;"></div>
+            <div id="error" class="alert alert-danger text-center mb-3" role="alert" style="display: none;">
+                </div>
 
-      <button type="submit" class="btn btn-primary w-100">تسجيل الدخول</button>
-    </form>
-  </div>
+            <button type="submit" class="btn btn-primary w-100 login-btn">تسجيل الدخول</button>
+        </form>
+    </div>
 
-  <script src="assets/js/env.js"></script>
- <script>
-  const errorBox = document.getElementById("error");
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // هذا المثال يفترض أن API_BASE_URL يتم تعريفه هنا
+        // في بيئة الإنتاج، يفضل أن يتم إدارته بشكل أكثر ديناميكية
+        const API_BASE_URL = "https://grocery-delivery-api.onrender.com"; // **تأكد من تحديث هذا الرابط إلى رابط الـ API الفعلي الخاص بك**
+    </script>
+    
+    <script>
+        const errorBox = document.getElementById("error");
+        const unifiedLoginForm = document.getElementById("unifiedLoginForm");
+        const phoneInput = document.getElementById("phone");
+        const passwordInput = document.getElementById("password");
+        const userTypeSelect = document.getElementById("userType");
+        const loginButton = document.querySelector(".login-btn"); // Get the button by its class
 
-  document.getElementById("unifiedLoginForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
+        unifiedLoginForm.addEventListener("submit", async function (e) {
+            e.preventDefault(); // Prevent default form submission
 
-    errorBox.style.display = "none";
-    errorBox.textContent = "";
+            errorBox.style.display = "none";
+            errorBox.textContent = "";
+            loginButton.disabled = true; // Disable button during submission
+            loginButton.textContent = "جاري الدخول...";
 
-    const phone = document.getElementById("phone").value.trim();
-    const password = document.getElementById("password").value;
-    const userType = document.getElementById("userType").value;
+            const phone = phoneInput.value.trim();
+            const password = passwordInput.value;
+            const userType = userTypeSelect.value;
 
-    if (!userType) {
-      errorBox.textContent = "يرجى اختيار نوع المستخدم";
-      errorBox.style.display = "block";
-      return;
-    }
+            if (!userType) {
+                displayError("يرجى اختيار نوع المستخدم.");
+                return;
+            }
+            
+            // Basic client-side validation for phone (optional but recommended)
+            if (!/^\d{9,15}$/.test(phone)) { // Example: 9 to 15 digits
+                displayError("يرجى إدخال رقم جوال صالح (أرقام فقط).");
+                return;
+            }
 
-    let endpoint = "";
-    let payload = {};
-    let redirectPath = "";
+            let endpoint = "";
+            let payload = {};
+            let redirectPath = "";
 
-    if (userType === "admin" || userType === "store") {
-      endpoint = "/auth/login";
-      payload = { phone, password, user_type: userType };
-      redirectPath = userType === "admin" ? "admin/dashboard.html" : "store/order.html";
-    } else if (userType === "rider") {
-      endpoint = "/auth/rider-login";
-      payload = { phone, password };
-      redirectPath = "rider/orders.html";
-    }
+            if (userType === "admin" || userType === "store") {
+                endpoint = "/auth/login"; // Assuming this handles both admin and store login
+                payload = { phone, password, user_type: userType };
+                redirectPath = userType === "admin" ? "admin/dashboard.html" : "store/order.html";
+            } else if (userType === "rider") {
+                endpoint = "/auth/rider-login";
+                payload = { phone, password };
+                redirectPath = "rider/orders.html";
+            }
 
-    try {
-      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+            try {
+                const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
 
-      // إذا كانت الاستجابة فاشلة ولكن تحتوي على JSON مفهوم
-      let data = {};
-      try {
-        data = await response.json();
-      } catch {
-        throw new Error("تعذر الاتصال بالخادم. تأكد من أن السيرفر يعمل بشكل صحيح.");
-      }
+                let data = {};
+                try {
+                    data = await response.json(); // Attempt to parse JSON even on error
+                } catch (jsonErr) {
+                    // If response is not JSON or parsing fails
+                    if (!response.ok) {
+                        // If it's a network error or server side 500 without JSON
+                        if (response.status === 500) {
+                            throw new Error("حدث خطأ في الخادم (500). يرجى المحاولة لاحقًا.");
+                        } else if (response.status === 404) {
+                             throw new Error("نقطة النهاية غير موجودة. يرجى التحقق من الرابط.");
+                        } else {
+                            throw new Error(`فشل الاتصال: ${response.status} ${response.statusText}.`);
+                        }
+                    }
+                    // If response.ok but json parsing failed (unlikely for successful API calls)
+                    throw new Error("استجابة غير متوقعة من الخادم.");
+                }
 
-      if (!response.ok) {
-        throw new Error(data.detail || "فشل تسجيل الدخول، تحقق من البيانات.");
-      }
+                if (!response.ok) {
+                    // If API returned a non-2xx status, display its error message
+                    displayError(data.detail || data.message || "فشل تسجيل الدخول، تحقق من البيانات.");
+                    return; // Exit after displaying error
+                }
 
-      const tokenKey = userType === "admin" ? "token" :
-                       userType === "store" ? "store_token" : "rider_token";
+                // Successful login
+                const tokenKey = userType === "admin" ? "token" :
+                                 userType === "store" ? "store_token" : "rider_token";
+                
+                localStorage.setItem(tokenKey, data.access_token);
 
-      localStorage.setItem(tokenKey, data.access_token);
+                // Store additional user-specific data
+                if (userType === "store") {
+                    localStorage.setItem("store_name", data.store_name || "");
+                } else if (userType === "rider") {
+                    localStorage.setItem("rider_name", data.name || "");
+                } else if (userType === "admin") {
+                    localStorage.setItem("admin_name", data.name || ""); // Assuming admin response has 'name'
+                }
 
-      if (userType === "store") localStorage.setItem("store_name", data.store_name || "");
-      if (userType === "rider") localStorage.setItem("rider_name", data.name || "");
 
-      window.location.href = redirectPath;
+                // Redirect on success
+                window.location.href = redirectPath;
 
-    } catch (err) {
-      errorBox.textContent = err.message || "حدث خطأ غير متوقع أثناء تسجيل الدخول";
-      errorBox.style.display = "block";
-    }
-  });
-</script>
+            } catch (err) {
+                // Catch any network errors or custom errors thrown above
+                displayError(err.message || "حدث خطأ غير متوقع أثناء تسجيل الدخول.");
+            } finally {
+                loginButton.disabled = false; // Re-enable button
+                loginButton.textContent = "تسجيل الدخول"; // Restore button text
+            }
+        });
 
+        function displayError(message) {
+            errorBox.textContent = message;
+            errorBox.style.display = "block";
+            loginButton.disabled = false; // Re-enable button if error occurs before finally
+            loginButton.textContent = "تسجيل الدخول";
+        }
+
+        // Optional: Clear error message when user starts typing again
+        phoneInput.addEventListener("input", () => errorBox.style.display = "none");
+        passwordInput.addEventListener("input", () => errorBox.style.display = "none");
+        userTypeSelect.addEventListener("change", () => errorBox.style.display = "none");
+    </script>
 </body>
 </html>
