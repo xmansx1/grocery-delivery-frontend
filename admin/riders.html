@@ -1,3 +1,4 @@
+<!-- ✅ النسخة المحدثة - جاهزة للنسخ -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -7,12 +8,8 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
   <style>
-    body {
-      background-color: #f8f9fa;
-    }
-    .table td, .table th {
-      vertical-align: middle;
-    }
+    body { background-color: #f8f9fa; }
+    .table td, .table th { vertical-align: middle; }
   </style>
 </head>
 <body>
@@ -64,9 +61,9 @@
         <input type="password" class="form-control mb-2" id="riderPassword" required />
         <label class="form-label">الحالة</label>
         <select class="form-select" id="riderStatus">
-          <option value="متاح ✅">متاح ✅</option>
-          <option value="مشغول ⏳">مشغول ⏳</option>
-          <option value="موقوف ⛔️">موقوف ⛔️</option>
+          <option value="متاح">متاح ✅</option>
+          <option value="مشغول">مشغول ⏳</option>
+          <option value="موقوف">موقوف ⛔️</option>
         </select>
       </div>
       <div class="modal-footer">
@@ -79,31 +76,22 @@
 <!-- ✅ سكربتات -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/env.js"></script>
-<!-- ✅ تم الإبقاء على نفس الهيكل مع تعديلات محسّنة -->
 <script>
   const adminToken = localStorage.getItem("admin_token");
-
   if (!adminToken) window.location.href = "login.html";
-  if (typeof API_BASE_URL === "undefined") {
-    alert("❌ لم يتم تحميل ملف env.js أو أن متغير API_BASE_URL غير معرف");
-  }
 
   function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("admin_token");
-    localStorage.removeItem("store_token");
-    localStorage.removeItem("rider_token");
-    localStorage.removeItem("admin_name");
-    localStorage.removeItem("store_name");
-    localStorage.removeItem("rider_name");
+    localStorage.clear();
     window.location.href = "login.html";
   }
 
-  function getBadgeColor(status) {
-    if (status === "متاح ✅") return "bg-success";
-    if (status === "مشغول ⏳") return "bg-warning text-dark";
-    if (status === "موقوف ⛔️") return "bg-secondary";
-    return "bg-light";
+  function getBadge(status) {
+    switch (status) {
+      case "متاح": return '<span class="badge bg-success">متاح ✅</span>';
+      case "مشغول": return '<span class="badge bg-warning text-dark">مشغول ⏳</span>';
+      case "موقوف": return '<span class="badge bg-secondary">موقوف ⛔️</span>';
+      default: return `<span class="badge bg-light">${status}</span>`;
+    }
   }
 
   async function loadRiders() {
@@ -122,18 +110,16 @@
   function renderRiders(riders) {
     const table = document.getElementById("ridersTable");
     table.innerHTML = "";
-
     if (riders.length === 0) {
       table.innerHTML = `<tr><td colspan="4" class="text-center text-muted">لا يوجد مناديب حالياً</td></tr>`;
       return;
     }
-
     riders.forEach(rider => {
       const row = document.createElement("tr");
       row.innerHTML = `
         <td>${rider.name}</td>
         <td>${rider.phone}</td>
-        <td><span class="badge ${getBadgeColor(rider.status)}">${rider.status}</span></td>
+        <td>${getBadge(rider.status)}</td>
         <td>
           <button class="btn btn-sm btn-outline-primary me-1" onclick="changeStatus(${rider.id})">تغيير الحالة</button>
           <button class="btn btn-sm btn-outline-danger" onclick="deleteRider(${rider.id})">حذف</button>
@@ -144,8 +130,9 @@
   }
 
   async function changeStatus(id) {
-    const status = prompt("أدخل الحالة الجديدة (متاح ✅ / مشغول ⏳ / موقوف ⛔️):");
-    if (!status) return;
+    const status = prompt("أدخل الحالة الجديدة (متاح / مشغول / موقوف):");
+    const valid = ["متاح", "مشغول", "موقوف"];
+    if (!valid.includes(status)) return alert("❌ الحالة غير صحيحة");
     try {
       const res = await fetch(`${API_BASE_URL}/riders/${id}/status?status=${encodeURIComponent(status)}`, {
         method: "PUT",
