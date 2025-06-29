@@ -1,18 +1,15 @@
+<!-- ✅ النسخة الكاملة المحدثة - ready to use -->
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>إدارة المحلات</title>
+  <title>إدارة المناديب</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
   <style>
-    body {
-      background-color: #f8f9fa;
-    }
-    .table td, .table th {
-      vertical-align: middle;
-    }
+    body { background-color: #f8f9fa; }
+    .table td, .table th { vertical-align: middle; }
   </style>
 </head>
 <body>
@@ -26,9 +23,9 @@
 
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4>إدارة المحلات</h4>
-    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addModal">
-      <i class="bi bi-plus-circle me-1"></i> إضافة محل
+    <h4>إدارة المناديب</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+      <i class="bi bi-plus-circle me-1"></i> إضافة مندوب
     </button>
   </div>
 
@@ -36,35 +33,41 @@
     <table class="table table-bordered bg-white shadow">
       <thead class="table-dark">
         <tr>
-          <th>اسم المحل</th>
+          <th>الاسم</th>
           <th>رقم الجوال</th>
           <th>الحالة</th>
           <th>الخيارات</th>
         </tr>
       </thead>
-      <tbody id="storesTable"></tbody>
+      <tbody id="ridersTable"></tbody>
     </table>
   </div>
 </div>
 
-<!-- ✅ نافذة إضافة محل -->
+<!-- ✅ نافذة إضافة مندوب -->
 <div class="modal fade" id="addModal" tabindex="-1">
   <div class="modal-dialog">
-    <form class="modal-content" id="addStoreForm">
+    <form class="modal-content" id="addRiderForm">
       <div class="modal-header">
-        <h5 class="modal-title">إضافة محل</h5>
+        <h5 class="modal-title">إضافة مندوب</h5>
         <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <label class="form-label">اسم المحل</label>
-        <input type="text" class="form-control mb-2" id="storeName" required />
+        <label class="form-label">الاسم</label>
+        <input type="text" class="form-control mb-2" id="riderName" required />
         <label class="form-label">رقم الجوال</label>
-        <input type="tel" class="form-control mb-2" id="storePhone" required />
+        <input type="tel" class="form-control mb-2" id="riderPhone" required />
         <label class="form-label">كلمة المرور</label>
-        <input type="password" class="form-control" id="storePassword" required />
+        <input type="password" class="form-control mb-2" id="riderPassword" required />
+        <label class="form-label">الحالة</label>
+        <select class="form-select" id="riderStatus">
+          <option value="متاح">متاح ✅</option>
+          <option value="مشغول">مشغول ⏳</option>
+          <option value="موقوف">موقوف ⛔️</option>
+        </select>
       </div>
       <div class="modal-footer">
-        <button class="btn btn-success" type="submit">إضافة</button>
+        <button class="btn btn-primary" type="submit">إضافة</button>
       </div>
     </form>
   </div>
@@ -75,114 +78,117 @@
 <script src="../assets/js/env.js"></script>
 <script>
   const adminToken = localStorage.getItem("admin_token");
-
   if (!adminToken) window.location.href = "login.html";
 
   function logout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("admin_token");
-    localStorage.removeItem("store_token");
-    localStorage.removeItem("rider_token");
-    localStorage.removeItem("store_name");
-    localStorage.removeItem("rider_name");
-    localStorage.removeItem("admin_name");
+    const keys = ["admin_token", "token", "store_token", "rider_token", "admin_name", "store_name", "rider_name"];
+    keys.forEach(k => localStorage.removeItem(k));
     window.location.href = "login.html";
   }
 
-  async function loadStores() {
-    try {
-      const res = await fetch(`${API_BASE_URL}/stores`, {
-        headers: { Authorization: "Bearer " + adminToken }
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "فشل تحميل المحلات");
-      renderStores(data);
-    } catch (err) {
-      alert("❌ فشل تحميل المحلات: " + err.message);
+  function getBadge(status) {
+    switch (status) {
+      case "متاح": return '<span class="badge bg-success">متاح ✅</span>';
+      case "مشغول": return '<span class="badge bg-warning text-dark">مشغول ⏳</span>';
+      case "موقوف": return '<span class="badge bg-secondary">موقوف ⛔️</span>';
+      default: return `<span class="badge bg-light">${status}</span>`;
     }
   }
 
-  function renderStores(stores) {
-    const table = document.getElementById("storesTable");
+  async function loadRiders() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/riders`, {
+        headers: { Authorization: "Bearer " + adminToken }
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.detail || "فشل جلب البيانات");
+      renderRiders(data);
+    } catch (err) {
+      alert("❌ فشل تحميل المناديب: " + err.message);
+    }
+  }
+
+  function renderRiders(riders) {
+    const table = document.getElementById("ridersTable");
     table.innerHTML = "";
-    stores.forEach(store => {
+    if (riders.length === 0) {
+      table.innerHTML = `<tr><td colspan="4" class="text-center text-muted">لا يوجد مناديب حالياً</td></tr>`;
+      return;
+    }
+    riders.forEach(rider => {
       const row = document.createElement("tr");
       row.innerHTML = `
-        <td>${store.name}</td>
-        <td>${store.phone}</td>
+        <td>${rider.name}</td>
+        <td>${rider.phone}</td>
+        <td>${getBadge(rider.status)}</td>
         <td>
-          <span class="badge ${store.is_active ? 'bg-success' : 'bg-secondary'}">
-            ${store.is_active ? 'مفعل' : 'موقوف'}
-          </span>
-        </td>
-        <td>
-          <button class="btn btn-sm btn-outline-primary me-1" onclick="toggleStatus(${store.id}, ${store.is_active})">
-            ${store.is_active ? 'إيقاف' : 'تفعيل'}
-          </button>
-          <button class="btn btn-sm btn-outline-danger" onclick="deleteStore(${store.id})">
-            حذف
-          </button>
+          <button class="btn btn-sm btn-outline-primary me-1" onclick="changeStatus(${rider.id})">تغيير الحالة</button>
+          <button class="btn btn-sm btn-outline-danger" onclick="deleteRider(${rider.id})">حذف</button>
         </td>
       `;
       table.appendChild(row);
     });
   }
 
-  async function toggleStatus(id, currentStatus) {
+  async function changeStatus(id) {
+    const status = prompt("أدخل الحالة الجديدة (متاح / مشغول / موقوف):");
+    const valid = ["متاح", "مشغول", "موقوف"];
+    if (!valid.includes(status)) return alert("❌ الحالة غير صحيحة");
     try {
-      const res = await fetch(`${API_BASE_URL}/stores/${id}/status?is_active=${!currentStatus}`, {
+      const res = await fetch(`${API_BASE_URL}/riders/${id}/status?status=${encodeURIComponent(status)}`, {
         method: "PUT",
         headers: { Authorization: "Bearer " + adminToken }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "فشل تحديث الحالة");
-      loadStores();
+      if (!res.ok) throw new Error(data.detail || "فشل تغيير الحالة");
+      loadRiders();
     } catch (err) {
       alert("❌ فشل تحديث الحالة: " + err.message);
     }
   }
 
-  async function deleteStore(id) {
-    if (!confirm("هل أنت متأكد من حذف هذا المحل؟")) return;
+  async function deleteRider(id) {
+    if (!confirm("هل أنت متأكد من حذف المندوب؟")) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/stores/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/riders/${id}`, {
         method: "DELETE",
         headers: { Authorization: "Bearer " + adminToken }
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.detail || "فشل الحذف");
-      loadStores();
+      if (!res.ok) throw new Error(data.detail || "فشل حذف المندوب");
+      loadRiders();
     } catch (err) {
       alert("❌ فشل الحذف: " + err.message);
     }
   }
 
-  document.getElementById("addStoreForm").addEventListener("submit", async function (e) {
+  document.getElementById("addRiderForm").addEventListener("submit", async function (e) {
     e.preventDefault();
-    const name = document.getElementById("storeName").value;
-    const phone = document.getElementById("storePhone").value;
-    const password = document.getElementById("storePassword").value;
+    const name = document.getElementById("riderName").value;
+    const phone = document.getElementById("riderPhone").value;
+    const password = document.getElementById("riderPassword").value;
+    const status = document.getElementById("riderStatus").value;
 
     try {
-      const res = await fetch(`${API_BASE_URL}/stores`, {
+      const res = await fetch(`${API_BASE_URL}/riders`, {
         method: "POST",
         headers: {
           Authorization: "Bearer " + adminToken,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ name, phone, password, is_active: true })
+        body: JSON.stringify({ name, phone, password, status })
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || "فشل الإضافة");
       bootstrap.Modal.getInstance(document.getElementById("addModal")).hide();
       this.reset();
-      loadStores();
+      loadRiders();
     } catch (err) {
       alert("❌ فشل الإضافة: " + err.message);
     }
   });
 
-  window.onload = loadStores;
+  window.onload = loadRiders;
 </script>
 
 </body>
